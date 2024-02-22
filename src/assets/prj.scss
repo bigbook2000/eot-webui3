@@ -1,0 +1,37 @@
+/* 应用样式 */
+
+.sv_dialog_head {
+    display: flex;
+    flex-direction: row;
+
+    .title {
+        flex: 1 1 auto;
+        width: 0;
+        font-size: 20px;
+        color: var(--eo_color_light2);
+    }
+
+    .close {
+        width: 40px;
+        padding: 5px 10px;
+        box-sizing: border-box;
+
+        .icon {
+            width: 20px;
+            height: 20px;
+            background-size: 20px 20px;
+            background-image: url("./icon/close_color.png");
+        }
+    }
+}
+.sv_dialog_foot {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    
+    .button {
+        padding: 20px 10px 0px 10px;
+        width: 120px;
+    }
+}
+
