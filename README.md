@@ -1,7 +1,7 @@
 # eot-webui3
 
 #### 介绍
-EOT物联网大数据平台Web前端页面
+EOT物联网大数据平台Web前端页面。后台调用eot-server.net提供接口，前后端完全独立，采用Vue3.0框架，TypeScript语言开发。
 
 #### 软件架构
 软件架构说明
