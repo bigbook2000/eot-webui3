@@ -11,7 +11,9 @@ export default { name: "device_list" }
     import vtable from "@/logic/common/vtable.vue"
 
     import device_info from "@/views/frame/device/device_info.vue"
-    import config_info from "@/views/frame/device/config_info.vue"
+    import device_config from "@/views/frame/device/device_config.vue"
+    import device_version from "@/views/frame/device/device_version.vue"
+
     import { tsInit } from "./device_"
 
     /** 避免vue代码过大  */
@@ -20,7 +22,8 @@ export default { name: "device_list" }
         v_table_device,
 
         v_device_info,
-        v_config_info,
+        v_device_config,
+        v_device_version,
 
         x_data_fields,
 
@@ -42,14 +45,19 @@ export default { name: "device_list" }
         onButtonClick_Upd,
         onButtonClick_Del,
         
-        onButtonClick_Config,    
+        onButtonClick_Update,
+        onButtonClick_Config,
+
+        onTableItem_device,
+        onTablePage_device,        
         onTableLoading_device,
         onTableRowClick_device,
         onTableSortChage_device,
 
         onPageChange_device,
-        onDialogClose_deviceinfo,
-        onDialogClose_configinfo
+        onDialogClose_device,
+        onDialogClose_config,
+        onDialogClose_version,
     } 
     = tsInit();
 
@@ -61,11 +69,10 @@ export default { name: "device_list" }
 
 <style lang="scss" scoped>
 .span_dtime0 {
-    color: #f00;
+    color: #999;
 }
 .span_dtime1 {
     color: #000;
-    font-weight: bold;
 }
 </style>
 
@@ -141,6 +148,10 @@ export default { name: "device_list" }
                         <div class="split"></div>
                         <div class="input_w">
                             <vbuttonk type="default" class="input_w" permit="device.list.upd" 
+                                @click="onButtonClick_Update">升级</vbuttonk>
+                        </div>
+                        <div class="input_w">
+                            <vbuttonk type="default" class="input_w" permit="device.list.upd" 
                                 @click="onButtonClick_Config">配置</vbuttonk>
                         </div>
                     </div>
@@ -149,29 +160,31 @@ export default { name: "device_list" }
             <div class="eo_col_f">
                 <vtable ref="v_table_device" 
                     name="设备"
-                    id-field="device_id" 
+                    id-field="f_device_id" 
+                    :on-item="onTableItem_device"
+                    :on-page="onTablePage_device"
                     @sort-change="onTableSortChage_device"
                     @loading="onTableLoading_device"
                     @row-click="onTableRowClick_device">
-                    <el-table-column prop="dtime_s" label="更新时间" width="180">
+                    <el-table-column prop="f_dtime_s" label="更新时间" width="180">
                         <template #default="scope">
-                            <span :class="'span_dtime'+scope.row['status']">{{ scope.row['dtime_s'] }}</span>
+                            <span :class="'span_dtime'+scope.row['f_status']">{{ scope.row['f_dtime_s'] }}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="mn" label="MN" sortable width="200" />
-                    <el-table-column prop="name" label="名称" sortable width="200" />
-                    <el-table-column v-for="item in x_data_fields" :key="item['dname']"
-                        :prop="item['dname']" :label="item['label']" sortable :width="item['width']">
+                    <el-table-column prop="f_mn" label="MN" sortable width="200" />
+                    <el-table-column prop="f_name" label="名称" sortable width="200" />
+                    <el-table-column v-for="item in x_data_fields" :key="item['f_dname']"
+                        :prop="item['f_dname']" :label="item['f_label']" sortable :width="item['f_width']">
                         <template #default="scope">                            
-                            <span>{{ scope.row.dataList[item.dname] }}</span>
+                            <span>{{ scope.row.dataList[item['f_dname']] }}</span>
                         </template>
                     </el-table-column>
-                    <el-table-column prop="dept_id_s" label="部门" sortable width="120" />
-                    <el-table-column prop="dtype" label="类型" sortable width="90" />
-                    <el-table-column prop="dversion" label="版本" sortable width="100" />
-                    <el-table-column prop="ctime_s" label="创建时间" sortable width="180" />
-                    <el-table-column prop="note" label="备注" width="200" show-overflow-tooltip />
-                    <el-table-column prop="dkey" label="设备标识" width="400" />
+                    <el-table-column prop="f_dept_id_s" label="部门" sortable width="120" />
+                    <el-table-column prop="f_dtype" label="类型" sortable width="90" />
+                    <el-table-column prop="f_dversion" label="版本" sortable width="100" />
+                    <el-table-column prop="f_ctime_s" label="创建时间" sortable width="180" />
+                    <el-table-column prop="f_note" label="备注" width="200" show-overflow-tooltip />
+                    <el-table-column prop="f_dkey" label="设备标识" width="400" />
                     <el-table-column />
                 </vtable>
             </div>
@@ -186,7 +199,8 @@ export default { name: "device_list" }
                 </el-pagination>
             </div>
         </div>
-        <device_info ref="v_device_info" @close="onDialogClose_deviceinfo"/>
-        <config_info ref="v_config_info" @close="onDialogClose_configinfo"/>
+        <device_info ref="v_device_info" @close="onDialogClose_device"/>
+        <device_config ref="v_device_config" @close="onDialogClose_config"/>
+        <device_version ref="v_device_version" @close="onDialogClose_version"/>
     </div>    
 </template>

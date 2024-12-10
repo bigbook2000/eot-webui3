@@ -1,5 +1,5 @@
 <template>
-    <!-- 设备配置 -->
+    <!-- 版本配置 -->
     <el-dialog v-model="x_show_dialog" 
         width="900px"
         :show-close="false" 
@@ -19,42 +19,22 @@
         </template>
         <div class="eo_form eo_w100" v-loading="x_show_loading">
             <div class="cell eo_w2">
-                <div class="label_n">标识</div>
-                <div class="input">
-                    <el-input v-model="x_device_data['dkey']" style="width:100%"
-                        readonly></el-input>
-                </div>
-            </div>
-            <div class="cell eo_w2">
                 <div class="label_n">版本</div>
                 <div class="input_w" style="width:100px;">
-                    <el-input v-model="x_device_data['dtype']" style="width:100%"
+                    <el-input v-model="x_version_data['f_dtype']" style="width:100%"
                         readonly></el-input>
                 </div>
                 <div class="input">
-                    <el-input v-model="x_device_data['dversion']" style="width:100%"
+                    <el-input v-model="x_version_data['f_dversion']" style="width:100%"
                         readonly></el-input>
                 </div>
             </div>
-            <div class="cell eo_w2">
-                <div class="label_n">MN</div>
-                <div class="input">
-                    <el-input v-model="x_device_data['mn']" style="width:100%"
-                        maxlength="64"></el-input>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">名称</div>
-                <div class="input">
-                    <el-input v-model="x_device_data['name']" style="width:100%"
-                        maxlength="64"></el-input>
-                </div>
-            </div>
+            <div class="cell eo_w2"></div>
             <div class="cell eo_w100">
                 <div class="label_n">配置</div>
                 <div class="input">
                     <el-input style="width:100%"
-                        v-model="x_device_data['config_data']" type="textarea" resize="none"
+                        v-model="x_version_data['f_config_data']" type="textarea" resize="none"
                         :row="4" :autosize="{minRows: 20, maxRows: 20}"></el-input>
                 </div>
             </div>
@@ -65,10 +45,7 @@
                     <el-button type="default" class="eo_w100" @click="onButtonClick_Cancel">关闭</el-button>
                 </div>
                 <div class="button">
-                    <el-button type="primary" class="eo_w100" @click="onButtonClick_ConfigGet">同步</el-button>
-                </div>
-                <div class="button">
-                    <el-button type="primary" class="eo_w100" @click="onButtonClick_ConfigSet">上传</el-button>
+                    <el-button type="primary" class="eo_w100" @click="onButtonClick_Save">保存</el-button>
                 </div>
             </div>
         </div>
@@ -77,8 +54,12 @@
 
 <script setup lang="ts">
 
-    import { ref, reactive, onMounted } from "vue"
+    //
+    // 版本配置，主要用于初始化版本参数
+    // 设备配置主要用于设备对应实际运行中的参数
+    //
 
+    import { ref, reactive, onMounted } from "vue"
     import eocore from "@/inc/eocore";
 
     import type {cfunc_boolean} from "@/inc/eotypes";
@@ -88,7 +69,7 @@
     }>()
 
     var x_show_dialog = ref(false);
-    var x_device_data: any = reactive({
+    var x_version_data: any = reactive({
     });
     var x_show_loading = ref(false);
 
@@ -113,9 +94,9 @@
             val = s.substring(pos+1);            
 
             if (key.startsWith("D")) {
-                if (key == "DKey") x_device_data["dkey"] = val;
-                if (key == "DType") x_device_data["dtype"] = val;
-                if (key == "DVersion") x_device_data["dversion"] = val;
+                if (key == "DKey") x_version_data["f_dkey"] = val;
+                if (key == "DType") x_version_data["f_dtype"] = val;
+                if (key == "DVersion") x_version_data["f_dversion"] = val;
             } else {
                 cpStr += key + "=" + val + ";\r\n";
             }
@@ -132,8 +113,8 @@
         
         // 创建一个副本
         let dataNew = Object.assign({}, data);
-        dataNew["config_data"] = updateConfigData(dataNew["config_data"]);
-        x_device_data = reactive(dataNew);        
+        dataNew["f_config_data"] = updateConfigData(dataNew["f_config_data"]);
+        x_version_data = reactive(dataNew);        
     }
 
     const onDialogOpened = () => {
@@ -145,43 +126,25 @@
             x_show_dialog.value = !result;
         });
     }
-    const onButtonClick_ConfigGet = async () => {
+    const onButtonClick_Save = async () => {
 
-        x_show_loading.value = true;
-        let ret = await eocore.post("/iot/gate/iot/command", [{
-            "mn": x_device_data["mn"],
-            "st": "39",
-            "cn": "3101",
-            "cp": ""
-        }]);
-        x_show_loading.value = false;
-        let data = eocore.check_net_object(ret);        
-        if (data == null) return;
-
-        x_device_data["config_data"] = updateConfigData(data["cp"]);
-    }
-    const onButtonClick_ConfigSet = async () => {
-
-        let configData: string = x_device_data["config_data"];
+        let configData: string = x_version_data["f_config_data"];
         configData = configData.replace(/[\r\n]/g, "");
         configData = updateConfigData(configData);
-        x_device_data["config_data"] = configData;
-
-        let dret = await eocore.show_confirm("确信要上传配置信息到设备吗？");
-        if (!dret) return;
+        x_version_data["f_config_data"] = configData;
 
         let cpStr = configData.replace(/[\r\n]/g, "");
 
         x_show_loading.value = true;
-        let ret = await eocore.post("/iot/gate/iot/command", [{
-            "mn": x_device_data["mn"],
-            "st": "39",
-            "cn": "3102",
-            "cp": cpStr
-        }]);
+        let ret = await eocore.proc("np_dversion_config", {
+            "v_version_id": x_version_data["f_version_id"],
+            "v_config_data": cpStr
+        });
         x_show_loading.value = false;
         let data = eocore.check_net_object(ret);
         if (data == null) return;
+
+        eocore.show_success("版本配置保存成功");
     }
 
     defineExpose({

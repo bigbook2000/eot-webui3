@@ -6,7 +6,7 @@
                 <el-tree ref="v_tree_dept"
                     :highlight-current="true"
                     :expand-on-click-node="false"
-                    node-key="dept_id"
+                    node-key="f_dept_id"
                     :data="x_tree_dept" 
                     :props="x_tree_props" 
                     @node-click="onTreeNodeClick_dept">
@@ -93,34 +93,33 @@ export default { name: "platform_dept" }
     
     const x_tree_props = {
         children: "children",
-        label: "name",
+        label: "f_name",
     }
     var x_tree_dept = ref<ctree_node[]>([]);
 
     var x_show_loading = ref(false);
     var x_form_types_dept = ref<cform_options[]>([]);
     var x_dept_data = ref({
-        "dept_id": 0,
-        "dept_pid": 0,
-        "dept_pid_s": "",
-        "name": "",
-        "address": "",
-        "contact": "",
-        "phone": "",
-        "note": "",
-        "status": 1
+        "f_dept_id": 0,
+        "f_dept_pid": 0,
+        "f_dept_pid_s": "",
+        "f_name": "",        
+        "f_contact": "",
+        "f_phone": "",
+        "f_note": "",
+        "f_status": 1,
+        "f_data_ex": "{}",
     });
 
     onMounted(async () => {
         
         x_form_types_dept.value = [
-            {type: "label", name: "dept_pid_s", span: 100, label: "上级"},
-            {type: "input", name: "name", span: 100, label: "名称"},
-            {type: "input", name: "address", span: 100, label: "地址"},
-            {type: "input", name: "contact", span: 100, label: "联系人"},
-            {type: "input", name: "phone", span: 100, label: "电话"},
-            {type: "input", name: "note", span: 100, label: "说明"},
-            {type: "switch", name: "status", span: 100, label: "状态"},
+            {type: "label", name: "f_dept_pid_s", span: 100, label: "上级"},
+            {type: "input", name: "f_name", span: 100, label: "名称"},
+            {type: "input", name: "f_contact", span: 100, label: "联系人"},
+            {type: "input", name: "f_phone", span: 100, label: "电话"},
+            {type: "input", name: "f_note", span: 100, label: "说明"},
+            {type: "switch", name: "f_status", span: 100, label: "状态"},
         ];
 
         loadTree_dept();
@@ -128,16 +127,16 @@ export default { name: "platform_dept" }
 
     const getEmpty_dept = (deptPid: number, deptPid_s: string): any => {
         return {
-            "dept_id": 0,
-            "dept_pid": deptPid,
-            "dept_pid_s": deptPid_s,
-            "level": 0,
-            "name": "",
-            "address": "",
-            "contact": "",
-            "phone": "",
-            "note": "",
-            "status": 1
+            "f_dept_id": 0,
+            "f_dept_pid": deptPid,
+            "f_dept_pid_s": deptPid_s,
+            "f_level": 0,
+            "f_name": "",            
+            "f_contact": "",
+            "f_phone": "",
+            "f_note": "",
+            "f_status": 1,
+            "f_data_ex": "{}",
         }
     }
 
@@ -145,7 +144,7 @@ export default { name: "platform_dept" }
 
         x_show_loading.value = true;
         let ret:any = await eocore.post("/api/dept/list", [{
-            "dept_pid": 1
+            "f_dept_pid": 1
         }])
         x_show_loading.value = false;
 
@@ -153,18 +152,18 @@ export default { name: "platform_dept" }
         if (list == undefined) return;
 
         let tree: any[] = [];
-        eolib.list_2_tree(list, tree, "dept_id", "dept_pid");
+        eolib.list_2_tree(list, tree, "f_dept_id", "f_dept_pid");
         x_tree_dept.value = tree;
     }
 
     const updateTreeNode_dept = (data: any, insert: boolean) => {
 
-        let deptId = data["dept_id"];
-        let deptPid = data["dept_pid"];
+        let deptId = data["f_dept_id"];
+        let deptPid = data["f_dept_pid"];
 
         if (insert) {
 
-            let pnode = eolib.find_tree_node(x_tree_dept.value, deptPid, "dept_id");
+            let pnode = eolib.find_tree_node(x_tree_dept.value, deptPid, "f_dept_id");
             if (pnode == undefined) {
                 eocore.show_info("未能找到对应的节点");
                 return;
@@ -181,7 +180,7 @@ export default { name: "platform_dept" }
 
         } else {
 
-            let node = eolib.find_tree_node(x_tree_dept.value, deptId, "dept_id");
+            let node = eolib.find_tree_node(x_tree_dept.value, deptId, "f_dept_id");
             if (node == undefined) {
                 eocore.show_info("未能找到对应的节点");
                 return;
@@ -198,7 +197,7 @@ export default { name: "platform_dept" }
     const onTreeNodeClick_dept = (data: any, node: any, event: any) => {
         //console.log(data);
         if (data.parent != undefined) {
-            data["dept_pid_s"] = data.parent["name"];
+            data["f_dept_pid_s"] = data.parent["f_name"];
         }
 
         let dataCopy: any = {};
@@ -221,8 +220,8 @@ export default { name: "platform_dept" }
         let deptPid = 1;
         let deptPid_s = "全部";
         if (node != undefined) {
-            deptPid = node["dept_id"];
-            deptPid_s = node["name"];
+            deptPid = node["f_dept_id"];
+            deptPid_s = node["f_name"];
         }
 
         let dataNew = getEmpty_dept(deptPid, deptPid_s);
@@ -246,12 +245,12 @@ export default { name: "platform_dept" }
             return;
         }
 
-        let dret = await eocore.show_confirm("确信要删除部门 " + node["name"] + " 吗？");
+        let dret = await eocore.show_confirm("确信要删除部门 " + node["f_name"] + " 吗？");
         if (!dret) return;
 
         x_show_loading.value = true;
         let ret: any = await eocore.post("/api/dept/del", [{
-            "dept_id": node["dept_id"]
+            "f_dept_id": node["f_dept_id"]
         }]);
         x_show_loading.value = false;
         let data = eocore.check_net_object(ret);
@@ -277,6 +276,9 @@ export default { name: "platform_dept" }
         if (data == undefined) return;
 
         eocore.show_success("重建索引成功");
+
+        // 重新加载
+        loadTree_dept();
     }
     const onButtonClick_Parent = () => {
 
@@ -294,28 +296,29 @@ export default { name: "platform_dept" }
             cb(true); return;
         }
         
-        if (eocore.check_string(data, "name") <= 0) {
+        if (eocore.check_string(data, "f_name") <= 0) {
             eocore.show_error("名称不能输入为空");
             cb(false); return;
         }
 
         x_show_loading.value = true;
         let ret: any = await eocore.post("/api/dept/upd", [{
-            "dept_id": data["dept_id"],
-            "dept_pid": data["dept_pid"],
-            "level": data["level"],
-            "name": data["name"],
-            "address": data["address"],
-            "contact": data["contact"],
-            "phone": data["phone"],
-            "note": data["note"],
-            "status": data["status"],
+            "f_dept_id": data["f_dept_id"],
+            "f_dept_pid": data["f_dept_pid"],
+            "f_level": data["f_level"],
+            "f_name": data["f_name"],            
+            "f_contact": data["f_contact"],
+            "f_phone": data["f_phone"],
+            "f_note": data["f_note"],
+            "f_status": data["f_status"],
+            "f_data_ex": data["f_data_ex"]
         }]);
         x_show_loading.value = false;
 
         let dataNew = eocore.check_net_object(ret);
         if (dataNew != null) {
-            updateTreeNode_dept(dataNew, (data["dept_id"]<=0));
+            updateTreeNode_dept(dataNew, (data["f_dept_id"]<=0));
+            eocore.show_success("信息更新成功");
         }
 
         cb(true);
@@ -328,7 +331,7 @@ export default { name: "platform_dept" }
         let dept = data.data;
         let deptParent = data.dept;
         
-        if (!eocore.check_id(deptParent, "dept_id")) {
+        if (!eocore.check_id(deptParent, "f_dept_id")) {
             eocore.show_info("请选择移动目标节点");
             return;
         }
@@ -338,7 +341,7 @@ export default { name: "platform_dept" }
         for (i=0; i<256; i++) {
 
             //console.log(dept, dp);
-            if (dept["dept_id"] == dp["dept_id"]) {
+            if (dept["f_dept_id"] == dp["f_dept_id"]) {
                 eocore.show_info("无法移动到子节点");
                 return;
             }
@@ -349,9 +352,9 @@ export default { name: "platform_dept" }
 
         x_show_loading.value = true;
         let ret: any = await eocore.post("/api/dept/parent", [{
-            "dept_id": dept["dept_id"],
-            "dept_pid_new": deptParent["dept_id"],
-            "level": 0
+            "f_dept_id": dept["f_dept_id"],
+            "f_dept_pid_new": deptParent["f_dept_id"],
+            "f_level": 0
         }]);
         x_show_loading.value = false;
 

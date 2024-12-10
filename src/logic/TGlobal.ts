@@ -1,3 +1,7 @@
+
+/**
+ * 应用全局对象
+ */
 class TGlobal {
 
     /** 全局性标识 */
@@ -16,6 +20,9 @@ class TGlobal {
 
     /** 顶级部门 */
     topDeptId: number = 1;
+
+    /** 服务器文件路径 */
+    fileStatic: string = "file";
 }
 
 

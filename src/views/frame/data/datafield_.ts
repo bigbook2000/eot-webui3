@@ -19,18 +19,20 @@ type t_formd = InstanceType<typeof vformd>;
 const v_formd_field = ref<t_formd>();
 
 
+// 每个用户使用的设备不同，对应不同的字段信息
+
 // 表单对话框字段
 var x_form_types = ref<cform_options[]>([
-    {type: "input", name: "label", span: 2, label: "名称"},
-    {type: "dic", name: "type", span: 2, label: "类型", dic: "数据类型", all: false, field: "label"},  
-    {type: "number", name: "order", span: 2, label: "顺序"},  
-    {type: "switch", name: "visible", span: 2, label: "可见"},
-    {type: "input", name: "dname", span: 2, label: "协议参数"},
-    {type: "input", name: "kname", span: 2, label: "解析参数"},
-    {type: "number", name: "precision", span: 2, label: "精度"},
-    {type: "input", name: "unit", span: 2, label: "单位"},
-    {type: "number", name: "width", span: 2, label: "宽度"},    
-    {type: "input", name: "note", span: 100, label: "备注"},
+    {type: "input", name: "f_label", span: 2, label: "名称"},
+    {type: "dic", name: "f_type", span: 2, label: "类型", dic: "数据类型", all: false, field: "label"},  
+    {type: "number", name: "f_order", span: 2, label: "顺序"},  
+    {type: "switch", name: "f_visible", span: 2, label: "可见"},
+    {type: "input", name: "f_dname", span: 2, label: "协议参数"},
+    {type: "input", name: "f_kname", span: 2, label: "解析参数"},
+    {type: "number", name: "f_precision", span: 2, label: "精度"},
+    {type: "input", name: "f_unit", span: 2, label: "单位"},
+    {type: "number", name: "f_width", span: 2, label: "宽度"},    
+    {type: "input", name: "f_note", span: 100, label: "备注"},
 ]);
 
 var x_show_loading = ref(false);
@@ -44,14 +46,8 @@ var m_query_dept_id = 0;
 const doVue_Mounted = () => {
 
     // 给部门赋值
-    x_query_dept_id_s.value = TGlobal.userData["dept_id_s"];
-    m_query_dept_id = TGlobal.userData["dept_id"];
-
-    v_table_field.value!.init_table({
-        on_item: (data) => {
-            data["create_time_s"] = eolib.datetime_2_string(data["create_time"]);
-        }
-    })
+    x_query_dept_id_s.value = TGlobal.userData["f_dept_id_s"];
+    m_query_dept_id = TGlobal.userData["f_dept_id"];
 
     netLoad_data_field();
 }
@@ -62,18 +58,18 @@ const doVue_Mounted = () => {
 const getEmpty_field = (): any => {
 
     return {
-        "data_field_id": 0,
-        "dept_id": 0,
-        "type": "",
-        "dname": "",
-        "kname": "",
-        "label": "",
-        "precision": 0,
-        "unit": "",
-        "order": 0,
-        "width": 100,
-        "visible": 1,
-        "note": ""
+        "f_data_field_id": 0,
+        "f_dept_id": 0,
+        "f_type": "",
+        "f_dname": "",
+        "f_kname": "",
+        "f_label": "",
+        "f_precision": 0,
+        "f_unit": "",
+        "f_order": 0,
+        "f_width": 100,
+        "f_visible": 1,
+        "f_note": ""
     }
 }
 
@@ -103,7 +99,7 @@ const onButtonClick_Add = async () => {
     }
 
     let fieldData = getEmpty_field();
-    fieldData["dept_id"] = m_query_dept_id;
+    fieldData["f_dept_id"] = m_query_dept_id;
 
     //console.log(fieldData);
     v_formd_field.value!.show_dialog(fieldData);
@@ -125,11 +121,14 @@ const onButtonClick_Upd = () => {
 const onButtonClick_Del = () => {
     v_table_field.value!.remove_data_proc_select("np_datafield_del", (data) => {
         return {
-            "v_data_field_id": data["data_field_id"]
+            "v_data_field_id": data["f_data_field_id"]
         }
     });
 }
 
+const onTableItem_field = (data: any) => {
+    data["f_ctime_s"] = eolib.datetime_2_string(data["f_ctime"]);
+}
 const onTableLoading_field = (show: boolean) => {
     x_show_loading.value = show;
 }
@@ -143,35 +142,35 @@ const onDialogClose_field = async (cancel: boolean, data: any, cb: cfunc_boolean
 
     //console.log(data);
 
-    if (!eocore.check_id(data, "dept_id")) {
+    if (!eocore.check_id(data, "f_dept_id")) {
         eocore.show_error("请选择部门");
         return;
     }
 
-    if (eocore.check_string(data, "label") <= 0) {
+    if (eocore.check_string(data, "f_label") <= 0) {
         eocore.show_error("请输入名称");
         return;
     }
-    if (eocore.check_string(data, "type") <= 0) {
+    if (eocore.check_string(data, "f_type") <= 0) {
         eocore.show_error("请选择类型");
         return;
     }
 
-    let fieldId = data["data_field_id"];
+    let fieldId = data["f_data_field_id"];
 
     v_table_field.value!.update_data_proc("np_datafield_upd", {
         "v_data_field_id": fieldId,
-        "v_dept_id": data["dept_id"],
-        "v_type": data["type"],
-        "v_dname": data["dname"],
-        "v_kname": data["kname"],
-        "v_label": data["label"],
-        "v_precision": data["precision"],
-        "v_unit": data["unit"],
-        "v_order": data["order"],
-        "v_width": data["width"],
-        "v_visible": data["visible"],
-        "v_note": data["note"],
+        "v_dept_id": data["f_dept_id"],
+        "v_type": data["f_type"],
+        "v_dname": data["f_dname"],
+        "v_kname": data["f_kname"],
+        "v_label": data["f_label"],
+        "v_precision": data["f_precision"],
+        "v_unit": data["f_unit"],
+        "v_order": data["f_order"],
+        "v_width": data["f_width"],
+        "v_visible": data["f_visible"],
+        "v_note": data["f_note"],
     }, -1, fieldId <= 0, true);
 
     cb(true);
@@ -185,8 +184,8 @@ const onInputChange_dept = (cancel: boolean, data: any, cb: cfunc_boolean) => {
     }
 
     // 给部门赋值
-    x_query_dept_id_s.value = data["name"];
-    m_query_dept_id = data["dept_id"];
+    x_query_dept_id_s.value = data["f_name"];
+    m_query_dept_id = data["f_dept_id"];
 
     //console.log(data);
 
@@ -212,6 +211,7 @@ export const tsInit = () => {
         onButtonClick_Upd,
         onButtonClick_Del,
 
+        onTableItem_field,
         onTableLoading_field,
         onTableRowClick_field,
         onDialogClose_field,

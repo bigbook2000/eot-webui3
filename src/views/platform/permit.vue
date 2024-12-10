@@ -23,10 +23,10 @@
             <div class="eo_col_f">
                 <vtable ref="v_table_permit" 
                     name="权限"
-                    id-field="permit_id" 
+                    id-field="f_permit_id" 
                     @loading="onTableLoading_permit">
-                    <el-table-column prop="name" label="名称" width="300" />
-                    <el-table-column prop="note" label="说明" width="500" />
+                    <el-table-column prop="f_name" label="名称" width="300" />
+                    <el-table-column prop="f_note" label="说明" width="500" />
                     <el-table-column />
                 </vtable>
             </div>
@@ -64,8 +64,8 @@ export default { name: "platform_permit" }
     onMounted(async () => {
         
         x_form_types_permit.value = [
-            {type: "input", name: "name", span: 100, label: "名称"},
-            {type: "input", name: "note", span: 100, label: "说明"},
+            {type: "input", name: "f_name", span: 100, label: "名称"},
+            {type: "input", name: "f_note", span: 100, label: "说明"},
         ];
 
         v_table_permit.value!.load_list_net("/api/permit/list", {});
@@ -77,9 +77,9 @@ export default { name: "platform_permit" }
     const onButtonClick_Add = () => {
 
         v_formd_permit.value!.show_dialog({
-            "permit_id": 0,
-            "name": "",            
-            "note": ""
+            "f_permit_id": 0,
+            "f_name": "",            
+            "f_note": ""
         });
     }
     const onButtonClick_Upd = () => {
@@ -90,7 +90,7 @@ export default { name: "platform_permit" }
     const onButtonClick_Del = () => {
         v_table_permit.value!.remove_data_net_select("/api/permit/del", (data) => {
             return {
-                "permit_id": data["permit_id"]
+                "f_permit_id": data["f_permit_id"]
             }
         });
     }
@@ -104,13 +104,13 @@ export default { name: "platform_permit" }
             cb(true); return;
         }
 
-        if (eocore.check_string(data, "name") <= 0) {
+        if (eocore.check_string(data, "f_name") <= 0) {
             eocore.show_error("权限不能输入为空");
             cb(false); return;
         }
 
         v_table_permit.value!.update_data_net(
-            "/api/permit/upd", data, -1, data["permit_id"]<=0, true);
+            "/api/permit/upd", data, -1, data["f_permit_id"]<=0, true);
         cb(true);
     }
 

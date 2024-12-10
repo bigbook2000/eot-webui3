@@ -1,7 +1,15 @@
 <template>
-    <!-- 个人资料 -->
+    <!-- 配置参数 -->
     <div class="eo_page" v-loading="x_show_loading">
-        
+        <div class="eo_tool_bar">
+            <div class="eo_form" style="width:800px;">
+                <div class="cell">
+                    <div class="input_w">
+                        <el-button type="primary" class="eo_w120p" @click="onButtonClick_DBList">更新数据接口</el-button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -21,24 +29,26 @@ export default { name: "platform_setting" }
 
     import type { cform_options, cfunc_boolean } from "@/inc/eotypes";
 
-    import vformd from "@/logic/common/vformd.vue"
     import eolib from "@/inc/eolib"
     import eodic from "@/inc/eodic"
-
-    type t_formd = InstanceType<typeof vformd>;
-    const v_formd_item = ref<t_formd>();
 
     var x_show_loading = ref(false);
 
     onMounted(() => {
     })
 
-    const onFormdClose_dic = (cancel: boolean, data: any, cb: cfunc_boolean): void => {
-        if (cancel) {
-            cb(true); return;
-        }
+    const onButtonClick_DBList = async () => {
 
-        cb(true);
+        let bret = await eocore.show_confirm("确信要重新加装数据接口吗？");
+        if (!bret) return;
+
+        x_show_loading.value = true;
+        let ret:any = await eocore.post("/api/common/query/init", [{
+        }]);
+        x_show_loading.value = false;
+
+        if (eocore.check_net_empty(ret) == null) return;
+        eocore.show_success("数据接口重置成功");
     }
 </script>
 

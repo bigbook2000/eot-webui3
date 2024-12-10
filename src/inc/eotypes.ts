@@ -64,3 +64,15 @@ export interface ctree_node {
     data: any,
     children: ctree_node[]
 }
+
+/**
+ * 文件项
+ */
+export interface cfile_item {
+    type: string,
+    keyid: number,
+    index?: number
+}
+
+/** 处理文件名 */
+export type cfile_func_name = (fileName: string) => string;

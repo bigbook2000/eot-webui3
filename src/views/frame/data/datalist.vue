@@ -43,10 +43,14 @@ export default { name: "data_datalist" }
         onButtonClick_Load_data,
         onButtonClick_Load_device,
         
+        onTableItem_data, 
+        onTablePage_data, 
         onTableLoading_data,
         onTableRowClick_data,
         onPageChange_data,
 
+        onTableItem_device,
+        onTablePage_device,
         onTableLoading_device,
         onTableRowClick_device,
         onPageChange_device,
@@ -107,18 +111,20 @@ export default { name: "data_datalist" }
                     <div class="eo_col_f">
                         <vtable ref="v_table_data" 
                             name="数据"
-                            id-field="data_id" 
+                            id-field="f_data_id" 
+                            :on-item="onTableItem_data"
+                            :on-page="onTablePage_data"
                             @loading="onTableLoading_data"
                             @row-click="onTableRowClick_data">
-                            <el-table-column prop="dtime_s" label="更新时间" width="180" />
-                            <el-table-column v-for="item in x_data_fields" :key="item['dname']"
-                                :prop="item['dname']" :label="item['label']" :width="item['width']">
+                            <el-table-column prop="f_dtime_s" label="更新时间" width="180" />
+                            <el-table-column v-for="item in x_data_fields" :key="item['f_dname']"
+                                :prop="item['f_dname']" :label="item['f_label']" :width="item['f_width']">
                                 <template #default="scope">                            
-                                    <span>{{ scope.row.dataList[item.dname] }}</span>
+                                    <span>{{ scope.row.dataList[item['f_dname']] }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="datatime_s" label="设备时间" width="180" />
-                            <el-table-column prop="qn_s" label="数据时间" width="180" />
+                            <el-table-column prop="f_datatime_s" label="设备时间" width="180" />
+                            <el-table-column prop="f_sqn_s" label="数据时间" width="180" />
                             <el-table-column />
                         </vtable>
                     </div>
@@ -169,15 +175,17 @@ export default { name: "data_datalist" }
                     <div class="eo_col_f">
                         <vtable ref="v_table_device" 
                             name="设备"
-                            id-field="device_id" 
+                            id-field="f_device_id" 
+                            :on-item="onTableItem_device"
+                            :on-page="onTablePage_device"
                             @loading="onTableLoading_device"
                             @row-click="onTableRowClick_device">
-                            <el-table-column prop="mn" label="MN" sortable width="200" />
-                            <el-table-column prop="name" label="名称" sortable width="200" />
-                            <el-table-column prop="dept_id_s" label="部门" sortable width="140" />
-                            <el-table-column prop="version_id_s" label="版本" sortable width="160" />                    
-                            <el-table-column prop="ctime_s" label="创建时间" sortable width="180" />
-                            <el-table-column prop="dkey" label="设备标识" width="400" />
+                            <el-table-column prop="f_mn" label="MN" sortable width="200" />
+                            <el-table-column prop="f_name" label="名称" sortable width="200" />
+                            <el-table-column prop="f_dept_id_s" label="部门" sortable width="140" />
+                            <el-table-column prop="f_version_id_s" label="版本" sortable width="160" />                    
+                            <el-table-column prop="f_ctime_s" label="创建时间" sortable width="180" />
+                            <el-table-column prop="f_dkey" label="设备标识" width="400" />
                             <el-table-column />
                         </vtable>
                     </div>

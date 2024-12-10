@@ -10,13 +10,15 @@ import TLogic from "@/logic/TLogic";
 import vtable from "@/logic/common/vtable.vue"
 
 import device_info from "@/views/frame/device/device_info.vue"
-import config_info from "@/views/frame/device/config_info.vue"
+import device_config from "@/views/frame/device/device_config.vue"
+import device_version from "@/views/frame/device/device_version.vue"
 
 type t_table = InstanceType<typeof vtable>;
 const v_table_device = ref<t_table>();
 
 const v_device_info = ref<InstanceType<typeof device_info>>();
-const v_config_info = ref<InstanceType<typeof config_info>>();
+const v_device_config = ref<InstanceType<typeof device_config>>();
+const v_device_version = ref<InstanceType<typeof device_version>>();
 
 var x_show_loading = ref(false);
 
@@ -37,23 +39,23 @@ var x_data_fields = ref<any[]>([]);
 /** 排序数组 */
 var m_orderby_list = [{
     name: "mn",
-    field: "`n_device`.`mn`"
+    field: "`n_device`.`f_mn`"
 }, {
     name: "name",
-    field: "`n_device`.`name`"
+    field: "`n_device`.`f_name`"
 }, {
     name: "dept_id_s",
-    field: "`n_device`.`dept_id`"
+    field: "`n_device`.`f_dept_id`"
 }, {
     name: "version_id_s",
-    field: "`n_device`.`version_id`"
+    field: "`n_device`.`f_version_id`"
 }, {
     name: "ctime_s",
-    field: "`n_device`.`ctime`"
+    field: "`n_device`.`f_ctime`"
 }];
 
 var m_orderby = [{
-    name: "device_id",
+    name: "f_device_id",
     order: " DESC"
 }];
 
@@ -64,25 +66,11 @@ const doVue_Mounted = async () => {
     
     // 先读取数据字段参数清单
     let ret = await eocore.proc("np_datafield_list", {
-        "v_dept_id": TGlobal.userData["dept_id"],
+        "v_dept_id": TGlobal.userData["f_dept_id"],
         "v_type": '2011'
     })
     let list = eocore.check_net_array(ret);
     if (list != undefined) x_data_fields.value = list;
-
-    v_table_device.value!.init_table({
-        on_item: (data) => {
-            data["ctime_s"] = eolib.datetime_2_string(data["ctime"]);
-            data["dtime_s"] = eolib.datetime_2_string(data["dtime"]);
-
-            // 格式化数据
-            TLogic.formatDeviceData(data);
-        },
-        on_page: (n: number): number => {
-            x_row_total.value = n;
-            return n;
-        }
-    })
 
     netLoad_device_query(-1);
 }
@@ -118,17 +106,17 @@ const getOrderByString = () => {
 const getEmpty_device = (): any => {
 
     return {
-        "device_id": 0,
-        "dkey": "",
-        "mn": "",
-        "name": "",
-        "dept_id": 0,
-        "dept_id_s": "",            
-        "version_id": 0,
-        "config_data": "",
-        "create_time": "",            
-        "enable": 1,
-        "note": ""
+        "f_device_id": 0,
+        "f_dkey": "",
+        "f_mn": "",
+        "f_name": "",
+        "f_dept_id": 0,
+        "f_dept_id_s": "",            
+        "f_version_id": 0,
+        "f_config_data": "",
+        "f_ctime": "",            
+        "f_enable": 1,
+        "f_note": ""
     }
 }
 
@@ -150,8 +138,8 @@ const netLoad_device_query = (pageIndex: number) => {
         "v_start_ctime": "2020-01-01 00:00:00",
         "v_end_ctime": "2050-01-01 00:00:00",
         "v_order_by": orderBy,
-        "v_page_row_index": rowIndex,
-        "v_page_row_count": pageRowCount
+        "_page_row_index": rowIndex,
+        "_page_row_count": pageRowCount
     });
 }
 
@@ -191,9 +179,17 @@ const onButtonClick_Upd = () => {
 const onButtonClick_Del = () => {
     v_table_device.value!.remove_data_proc_select("np_device_del", (data) => {
         return {
-            "v_device_id": data["device_id"]
+            "v_device_id": data["f_device_id"]
         }
     });
+}
+
+const onButtonClick_Update = async () => {
+
+    let deviceData = v_table_device.value!.get_select_data(true);
+    if (deviceData == undefined) return;
+
+    v_device_version.value!.show_dialog(deviceData);
 }
 
 /**
@@ -205,16 +201,30 @@ const onButtonClick_Config = async () => {
 
     // 读取配置参数
     let ret = await eocore.proc("np_config_get", {
-        v_device_id: deviceData["device_id"]
+        v_device_id: deviceData["f_device_id"]
     });
     let dataConfig = eocore.check_net_empty(ret);
-    if (dataConfig == null) {
-        eocore.show_info("无法获取设备配置参数");
-        return;
+    if (!eocore.check_id(dataConfig, "f_device_id")) {
+        eocore.show_info("设备无配置信息");
+        deviceData["f_config_data"] = "";        
+    } else {
+        deviceData["f_config_data"] = dataConfig["f_config_data"];
     }
-    deviceData["config_data"] = dataConfig["config_data"];
 
-    v_config_info.value!.show_dialog(deviceData);
+    v_device_config.value!.show_dialog(deviceData);
+}
+
+const onTableItem_device = (data: any) => {
+    data["f_ctime_s"] = eolib.datetime_2_string(data["f_ctime"]);
+    data["f_dtime_s"] = eolib.datetime_2_string(data["f_dtime"]);
+
+    // 格式化数据
+    TLogic.formatDeviceData(data);
+}
+
+const onTablePage_device = (n: number): number => {
+    x_row_total.value = n;
+    return n;
 }
 
 const onTableLoading_device = (show: boolean) => {
@@ -258,19 +268,19 @@ const onPageChange_device = (pageIndex: number) => {
     netLoad_device_query(pageIndex - 1);
 }
 
-const onDialogClose_deviceinfo = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
+const onDialogClose_device = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
     if (cancel) {
         cb(true); return;
     }
 
     console.log(data);
 
-    if (eocore.to_int(data["dept_id"]) <= TGlobal.topDeptId) {
+    if (eocore.to_int(data["f_dept_id"]) <= TGlobal.topDeptId) {
         eocore.show_info("选择正确的部门");
         return;
     }
 
-    let mn = eocore.to_string(data["mn"]);
+    let mn = eocore.to_string(data["f_mn"]);
     let pat = /^[a-zA-Z0-9_-]{2,64}$/;
     if (!pat.test(mn)) {
         eocore.show_error('mn输入不符合规范[2-64]');
@@ -279,39 +289,34 @@ const onDialogClose_deviceinfo = async (cancel: boolean, data: any, cb: cfunc_bo
     // 统一转换成大写
     data["mn"] = mn.toUpperCase();
 
-    let deviceId = data["device_id"];
+    console.log(data);
+    let deviceId = data["f_device_id"];
 
     v_table_device.value!.update_data_proc("np_device_upd", {
         "v_device_id": deviceId,
-        "v_dkey": data["dkey"],
-        "v_dept_id": data["dept_id"],
-        "v_mn": data["mn"],
-        "v_name": data["name"],            
-        "v_enable": data["enable"],
-        "v_note": data["note"]
+        "v_dept_id": data["f_dept_id"],
+        "v_mn": data["f_mn"],
+        "v_name": data["f_name"],            
+        "v_enable": data["f_enable"],
+        "v_note": data["f_note"]
     }, -1, deviceId <= 0, true);
 
     cb(true);
 }
 
-const onDialogClose_configinfo = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
+const onDialogClose_config = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
     if (cancel) {
         cb(true); return;
     }
 
-    // let dkey = data["dkey"];
-    
-    // let configData: string = eocore.to_string(data["config_data"]);
-    // configData = configData.replace(/\s+/g, "");
+    cb(true);
+}
 
-    // let ret = await eocore.proc("np_config_set", {
-    //     "v_dkey": dkey,
-    //     "v_config_data": configData
-    // })
-    // let dateNew = eocore.check_net_object(ret);
-    // if (dateNew == undefined) return;
+const onDialogClose_version = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
 
-    // eocore.show_success("设备配置成功");
+    if (cancel) {
+        cb(true); return;
+    }
 
     cb(true);
 }
@@ -323,7 +328,8 @@ export const tsInit = () => {
         v_table_device,
 
         v_device_info,
-        v_config_info,
+        v_device_config,
+        v_device_version,
 
         x_data_fields,
 
@@ -345,13 +351,18 @@ export const tsInit = () => {
         onButtonClick_Upd,
         onButtonClick_Del,
         
-        onButtonClick_Config,    
+        onButtonClick_Update,
+        onButtonClick_Config,        
+
+        onTableItem_device,
+        onTablePage_device,
         onTableLoading_device,
         onTableRowClick_device,
         onTableSortChage_device,
 
         onPageChange_device,
-        onDialogClose_deviceinfo,
-        onDialogClose_configinfo
+        onDialogClose_device,
+        onDialogClose_config,
+        onDialogClose_version,
     }
 }

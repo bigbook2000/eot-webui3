@@ -7,28 +7,28 @@
             <div class="cell eo_w100">
                 <div class="label_n">设备标识</div>
                 <div class="input">
-                    <el-input v-model="x_device_data['dkey']" style="width:100%"
+                    <el-input v-model="x_device_data['f_dkey']" style="width:100%"
                         readonly></el-input>
                 </div>
             </div>
             <div class="cell eo_w100">
                 <div class="label_n">部门</div>
                 <div class="input">
-                    <el-input v-model="x_device_data['dept_id_s']" style="width:100%" readonly
+                    <el-input v-model="x_device_data['f_dept_id_s']" style="width:100%" readonly
                         @click="onInputClick_dept" ></el-input>
                 </div>
             </div>
             <div class="cell eo_w100">
                 <div class="label_n">MN</div>
                 <div class="input">
-                    <el-input v-model="x_device_data['mn']" style="width:100%"
+                    <el-input v-model="x_device_data['f_mn']" style="width:100%"
                         maxlength="64"></el-input>
                 </div>
             </div>
             <div class="cell eo_w100">
                 <div class="label_n">名称</div>
                 <div class="input">
-                    <el-input v-model="x_device_data['name']" style="width:100%"
+                    <el-input v-model="x_device_data['f_name']" style="width:100%"
                         maxlength="64"></el-input>
                 </div>
             </div>
@@ -36,21 +36,21 @@
                 <div class="label_n">备注</div>
                 <div class="input">
                     <el-input style="width:100%"
-                        v-model="x_device_data['note']" type="textarea" resize="none"
+                        v-model="x_device_data['f_note']" type="textarea" resize="none"
                         :row="4" :autosize="{minRows: 4, maxRows: 4}"></el-input>
                 </div>
             </div>
             <div class="cell eo_w2">
                 <div class="label_n">创建时间</div>
                 <div class="input">
-                    <el-input v-model="x_device_data['create_time_s']" style="width:100%"
+                    <el-input v-model="x_device_data['f_ctime_s']" style="width:100%"
                         readonly maxlength="32"></el-input>
                 </div>
             </div>
             <div class="cell eo_w2">
                 <div class="label_n">有效</div>
                 <div class="input">
-                    <el-switch v-model="x_device_data['enable']" 
+                    <el-switch v-model="x_device_data['f_enable']" 
                         :active-value="1" :inactive-value="0"></el-switch>
                 </div>
             </div>
@@ -114,10 +114,10 @@
         }
 
         let deptData = data.dept;        
-        if (eocore.check_id(deptData, "dept_id")) {
+        if (eocore.check_id(deptData, "f_dept_id")) {
 
-            x_device_data["dept_id"] = deptData["dept_id"];
-            x_device_data["dept_id_s"] = deptData["name"];
+            x_device_data["f_dept_id"] = deptData["f_dept_id"];
+            x_device_data["f_dept_id_s"] = deptData["f_name"];
         }
 
         cb(true);

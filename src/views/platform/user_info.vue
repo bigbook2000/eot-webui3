@@ -7,118 +7,72 @@
             <div class="cell eo_w2">
                 <div class="label_n">账号</div>
                 <div class="input">
-                    <el-input v-model="x_user_data['login_id']" style="width:100%"
+                    <el-input v-model="x_user_data['f_login_id']" style="width:100%"
                         maxlength="32"></el-input>
                 </div>
             </div>
             <div class="cell eo_w2">
                 <div class="label_n">姓名</div>
                 <div class="input">
-                    <el-input v-model="x_user_data['name']" style="width:100%"
+                    <el-input v-model="x_user_data['f_name']" style="width:100%"
                         maxlength="32"></el-input>
                 </div>
             </div>
             <div class="cell eo_w2">
                 <div class="label_n">部门</div>
                 <div class="input">
-                    <el-input v-model="x_user_data['dept_id_s']" style="width:100%" readonly
+                    <el-input v-model="x_user_data['f_dept_id_s']" style="width:100%" readonly
                         @click="onInputClick_dept" ></el-input>
                 </div>
             </div>
+
             <div class="cell eo_w2">
+                <div class="label_n">状态</div>
+                <div class="input">
+                    <el-switch v-model="x_user_data['f_status']" 
+                        :active-value="1" :inactive-value="0"></el-switch>
+                </div>
+            </div>
+
+            <div class="cell eo_w100">
                 <div class="label_n">角色</div>
                 <div class="input">
-                    <el-select v-model="x_user_data['role_d']"
+                    <el-select v-model="x_user_data['f_role_d']"
                         multiple
                         placeholder="请选择角色"
                         style="width:100%">
                     <el-option
                         v-for="item in x_role_list"
-                        :key="item['role_id']"
-                        :label="item['name']"
-                        :value="item['role_id']" />
+                        :key="item['f_role_id']"
+                        :label="item['f_name']"
+                        :value="item['f_role_id']" />
                     </el-select>
                 </div>
             </div>
+            
             <div class="cell eo_w2">
                 <div class="label_n">性别</div>
                 <div class="input">
                     <vdic dic="性别" :all="false" field="label"
-                        v-model="x_user_data['sex']" style="width:100%" />
+                        v-model="x_user_data['f_sex']" style="width:100%" />
                 </div>
             </div>
             <div class="cell eo_w2">
-                <div class="label_n">出生日期</div>
+                <div class="label_n">电话</div>
                 <div class="input">
-                    <el-date-picker style="width:100%"
-                        v-model="x_user_data['birthday']"
-                        type="date" format="YYYY-MM-DD"
-                        placeholder="选择日期">
-                    </el-date-picker>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">常用电话</div>
-                <div class="input">
-                    <el-input v-model="x_user_data['phone']" style="width:100%"
-                        maxlength="32"></el-input>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">紧急电话</div>
-                <div class="input">
-                    <el-input v-model="x_user_data['bphone']" style="width:100%"
-                        maxlength="32"></el-input>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">微信</div>
-                <div class="input">
-                    <el-input v-model="x_user_data['weixin']" style="width:100%"
-                        maxlength="32"></el-input>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">籍贯</div>
-                <div class="input">
-                    <el-input v-model="x_user_data['register']" style="width:100%"
+                    <el-input v-model="x_user_data['f_phone']" style="width:100%"
                         maxlength="32"></el-input>
                 </div>
             </div>
             <div class="cell eo_w100">
-                <div class="label_n">现居地址</div>
+                <div class="label_n">地址</div>
                 <div class="input">
-                    <el-input v-model="x_user_data['location']" style="width:100%"
-                        maxlength="128"></el-input>
+                    <el-input v-model="x_user_data['f_location']" style="width:100%"
+                        maxlength="32"></el-input>
                 </div>
             </div>
-            <div class="cell eo_w2">
-                <div class="label_n">入职日期</div>
-                <div class="input">
-                    <el-date-picker style="width:100%"
-                        v-model="x_user_data['entrytime']"
-                        type="date" format="YYYY-MM-DD"
-                        placeholder="选择日期">
-                    </el-date-picker>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">离职日期</div>
-                <div class="input">
-                    <el-date-picker style="width:100%"
-                        v-model="x_user_data['leavetime']"
-                        type="date" format="YYYY-MM-DD"
-                        placeholder="选择日期">
-                    </el-date-picker>
-                </div>
-            </div>
-            <div class="cell eo_w2">
-                <div class="label_n">状态</div>
-                <div class="input">
-                    <el-switch v-model="x_user_data['status']" 
-                        :active-value="1" :inactive-value="0"></el-switch>
-                </div>
-            </div>
+            
+            
         </div>
         <dept_list ref="v_dept_list" @close="onDialogClose_deptlist"/>
     </vdialog>
@@ -191,10 +145,10 @@
         }
 
         let deptData = data.dept;        
-        if (eocore.check_id(deptData, "dept_id")) {
+        if (eocore.check_id(deptData, "f_dept_id")) {
 
-            x_user_data["dept_id"] = deptData["dept_id"];
-            x_user_data["dept_id_s"] = deptData["name"];
+            x_user_data["f_dept_id"] = deptData["f_dept_id"];
+            x_user_data["f_dept_id_s"] = deptData["f_name"];
         }
 
         cb(true);

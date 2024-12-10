@@ -508,7 +508,7 @@ export default {
 	 * @param params 数据接口参数
 	 * @returns 
 	 */
-	async proc(name: string, params: any): Promise<any> {
+	async proc2(name: string, params: any): Promise<any> {
 
 		let that = this;		
 		var ret = { data: { d_: that.RESULT_UNKNOWN, s_: '未执行任何操作' } };
@@ -547,7 +547,55 @@ export default {
 
 		console.log("**** proc ****", name, params, ret);
 		return ret;
-	},	
+	},
+
+
+	/**
+	 * 直接调用数据接口
+	 * @param name 数据接口名称 
+	 * @param params 数据接口参数
+	 * @returns 
+	 */
+	async proc(name: string, params: any): Promise<any> {
+
+		let that = this;		
+		var ret = { data: { d_: that.RESULT_UNKNOWN, s_: '未执行任何操作' } };
+
+		try {
+
+			let dt = new Date();
+			let request = that.create_axios(that.base_url);
+
+			let data = {
+				_d: 0,
+				_s: "",
+				_k: that.token,
+				_t: dt.getTime(),
+				_list: [{
+					name: name,
+					pms: params
+				}]
+			}
+
+			await request({
+				url: "/api/common/query",
+				method: 'POST',
+				data: data
+			}).then (function(res) {
+				ret = res;
+			}, function(err) {
+				ret = { data: { d_: that.RESULT_LOCAL, s_: err.toString() } };
+			}).catch(function (err) {
+				ret = { data: { d_: that.RESULT_LOCAL, s_: err.toString() } };
+			});
+			
+		} catch (ex: any) {
+			ret = { data: { d_: that.RESULT_LOCAL, s_: ex.toString() } };
+		}
+
+		console.log("**** proc ****", name, params, ret);
+		return ret;
+	},
 
     /**
      * 刷新直到显示

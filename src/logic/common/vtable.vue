@@ -10,20 +10,26 @@
 
     import { ref, reactive, computed } from "vue"
 
-    import type { cfunc_confirm, ctable_options } from "@/inc/eotypes"
+    import type { cfunc_confirm, ctable_func_item, ctable_func_page } from "@/inc/eotypes"
     import eocore from "@/inc/eocore";
     import eolib from "@/inc/eolib";
 
     import { ElTable } from 'element-plus'
     const v_table = ref<InstanceType<typeof ElTable>>();
-
+    
     // withDefaults
     const props = withDefaults(defineProps<{
         name: string,
         idField: string,
+        /** 格式化 */
+        onItem?: ctable_func_item,
+        /** 分页 */
+        onPage?: ctable_func_page;
     }>(), {
         name: "列表",
-        idField: ""
+        idField: "",
+        onItem: undefined,
+        onPage: undefined,
     })
 
     // const propIdField = computed(() => props.idField)
@@ -33,16 +39,10 @@
         (e: "loading", show: boolean): void
     }>()    
 
-    var m_table_options: ctable_options = reactive({});
-
     /** 总数 */
     var m_total = 0;
     var x_list = ref(new Array<any>());
     var m_select_data: any = {};
-
-    const init_table = (tableOptions: ctable_options) => {
-        m_table_options = reactive(tableOptions);
-    }
 
     const get_list = (): any[] => {
         return x_list.value;
@@ -65,15 +65,16 @@
     const clear = () => {
         x_list.value = [];
 
-        if (m_table_options.on_page != undefined) 
-            m_total = m_table_options.on_page(0);
+        if (props.onPage != undefined) {
+            m_total = props.onPage(0);
+        }
     }
 
     const load_list = (list: Array<any>): Array<any> => {
 
-        if (m_table_options.on_item != undefined) {
+        if (props.onItem != undefined) {
             for (let d of list) {
-                d = m_table_options.on_item(d);
+                d = props.onItem(d);
             }
         }
 
@@ -82,8 +83,9 @@
             if (d["page_row_index"] < 0) {
                 let n = eocore.to_int(d["total_count"]);
 
-                if (m_table_options.on_page != undefined) 
-                    m_total = m_table_options.on_page(n);
+                if (props.onPage != undefined) {
+                    m_total = props.onPage(n);
+                }
             }
         }
 
@@ -127,6 +129,7 @@
         return load_list(list);
     }
 
+
     /**
      * 变更一行表格数据
      * @param data data
@@ -147,7 +150,10 @@
 
         data["_index"] = index;
         data["_insert"] = insert;
-        if (m_table_options.on_item != undefined) m_table_options.on_item(data);
+
+        if (props.onItem != undefined) {
+            props.onItem(data);
+        }
 
         if (insert) {
 
@@ -172,11 +178,12 @@
 
             if (index < 0) {
                 index = eolib.get_index(x_list.value, props.idField, dataId);
-                console.log(x_list.value, m_table_options, dataId, index);
-                if (index != -1)
-                    x_list.value[index] = data;
-                else
+                //console.log(x_list.value, dataId, index);
+                if (index != -1) {
+                    x_list.value[index] = Object.assign({}, x_list.value[index], data);
+                } else {
                     x_list.value.unshift(data);
+                }
             }
 
             if (showMsg) {
@@ -265,7 +272,7 @@
         }
 
         let dataId = data[idField];
-        console.log(x_list.value, idField, data)
+        //console.log(x_list.value, idField, data)
         let index = eolib.get_index(x_list.value, idField, dataId);
         if (index == -1) {
             console.log("**** ****", "vtable::remove_data: not data = " + idField);
@@ -425,7 +432,6 @@
     }
 
     defineExpose({
-        init_table,
         get_list,
         get_select_data,
         clear,

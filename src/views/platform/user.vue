@@ -48,20 +48,18 @@
             <div class="eo_col_f">
                 <vtable ref="v_table_user" 
                     name="用户"
-                    id-field="user_id" 
+                    id-field="f_user_id" 
+                    :on-item="onTableItem_user"
                     @loading="onTableLoading_user"
                     @row-click="onTableRowClick_user">
-                    <el-table-column prop="status_s" label="状态" width="70" />
-                    <el-table-column prop="login_id" label="账号" width="180" />
-                    <el-table-column prop="name" label="姓名" width="100" />
-                    <el-table-column prop="dept_id_s" label="部门" width="140" />
-                    <el-table-column prop="role_s" label="角色" width="200" />
-                    <el-table-column prop="sex" label="性别" width="70" />
-                    <el-table-column prop="birthday_s" label="出生日期" width="120" />
-                    <el-table-column prop="phone" label="电话" width="140" />
-                    <el-table-column prop="location" label="现居地址" width="200" />
-                    <el-table-column prop="entrytime_s" label="入职日期" width="120" />
-                    <el-table-column prop="leavetime_s" label="离职日期" width="120" />
+                    <el-table-column prop="f_status_s" label="状态" width="70" />
+                    <el-table-column prop="f_login_id" label="账号" width="180" />
+                    <el-table-column prop="f_name" label="姓名" width="100" />
+                    <el-table-column prop="f_dept_id_s" label="部门" width="140" />
+                    <el-table-column prop="f_role_s" label="角色" width="200" />
+                    <el-table-column prop="f_sex" label="性别" width="70" />
+                    <el-table-column prop="f_phone" label="电话" width="140" />
+                    <el-table-column prop="f_location" label="地址" width="280" />
                     <el-table-column />
                 </vtable>
             </div>
@@ -84,12 +82,13 @@ export default { name: "platform_user" }
     import eolib from "@/inc/eolib";
 
     import vbuttonk from "@/logic/common/vbuttonk.vue"
-
     import vtable from "@/logic/common/vtable.vue"
+
+    import user_info from "@/views/platform/user_info.vue"
+
     type t_table = InstanceType<typeof vtable>;
     const v_table_user = ref<t_table>();
 
-    import user_info from "@/views/platform/user_info.vue"
     const v_user_info = ref<InstanceType<typeof user_info>>();
 
     var x_show_loading = ref(false);
@@ -102,24 +101,6 @@ export default { name: "platform_user" }
     var m_role_list: any[];
 
     onMounted(async () => { 
-
-        v_table_user.value!.init_table({
-            on_item: (data) => {
-
-                if (data["status"] != 0)
-                    data["status_s"] = "-";
-                else
-                    data["status_s"] = "失效";
-
-                data["birthday_s"] = eolib.date_2_string(data["birthday"]);
-                data["entrytime_s"] = eolib.date_2_string(data["entrytime"]);
-                data["leavetime_s"] = eolib.date_2_string(data["leavetime"]);
-
-                let rd = getRoleInfo(data["role"]);
-                data["role_s"] = rd["roleStr"];
-                data["role_d"] = rd["roleIds"];
-            }
-        })
 
         let ret: any = await eocore.post("/api/role/list", [{}]);
         let list = eocore.check_net_array(ret);
@@ -144,13 +125,16 @@ export default { name: "platform_user" }
         
         for (let d of ss) {
 
-            let item = eolib.get_item(m_role_list, "role_id", d);            
-            if (item != undefined) {
-                roleStr += item["name"] + ",";
+            let rid = parseInt(d);
+            if (rid > 0) {
+                let item = eolib.get_item(m_role_list, "f_role_id", d);
+                if (item != undefined) {
+                    roleStr += item["f_name"] + ",";
+                }
+                roleIds.push(rid);
             }
-
-            roleIds.push(parseInt(d));
         }
+        //console.log(roleStr, roleIds)
 
         return {
             "roleStr": roleStr,
@@ -160,25 +144,19 @@ export default { name: "platform_user" }
 
     const getEmpty_user = (): any => {
         return {
-            "user_id": 0,
-            "login_id": "",
-            "name": "",
-            "dept_id": 0,
-            "dept_id_s": "",
-            "role": "", // id字符串
-            "role_d": [], // id数组
-            "role_s": "", // 名称字符串
-            "sex": "男",
-            "birthday": "2000-01-01 00:00:00",
-            "phone": "",
-            "bphone": "",
-            "weixin": "",
-            "register": "",
-            "location": "",
-            "entrytime": "1970-01-01 00:00:00",
-            "leavetime": "1970-01-01 00:00:00",
-            "note": "",
-            "status": 1
+            "f_user_id": 0,
+            "f_login_id": "",
+            "f_name": "",
+            "f_dept_id": 0,
+            "f_dept_id_s": "",
+            "f_role": "", // id字符串
+            "f_role_d": [], // id数组
+            "f_role_s": "", // 名称字符串
+            "f_sex": "男",
+            "f_phone": "",
+            "f_location": "",
+            "f_note": "",
+            "f_status": 1
         }
     }
 
@@ -197,7 +175,7 @@ export default { name: "platform_user" }
     const onButtonClick_Add = () => {
 
         let userData = getEmpty_user();
-        userData["entrytime"] = eolib.date_2_string(new Date());
+        userData["f_entrytime"] = eolib.date_2_string(new Date());
         v_user_info.value!.show_dialog(userData);
     }
     const onButtonClick_Upd = () => {
@@ -210,7 +188,7 @@ export default { name: "platform_user" }
     const onButtonClick_Del = async () => {
         v_table_user.value!.remove_data_net_select("/api/user/del", (data) => {
             return {
-                "user_id": data["user_id"]
+                "user_id": data["f_user_id"]
             }
         });
     }
@@ -224,8 +202,8 @@ export default { name: "platform_user" }
 
         x_show_loading.value = true;
         let ret: any = await eocore.post("/api/user/reset", [{
-            "user_id": userData["user_id"],
-            "login_id": userData["login_id"]
+            "user_id": userData["f_user_id"],
+            "login_id": userData["f_login_id"]
         }])
         x_show_loading.value = false;
 
@@ -234,6 +212,29 @@ export default { name: "platform_user" }
 
         eocore.show_success("密码重置成功");
     }    
+
+    const onTableItem_user = (data: any) => {
+
+        try {
+            let json = JSON.parse(data["f_data_ex"])
+            Object.assign(data, data, json);
+        } catch (ex) {
+            console.log(ex);
+        }
+
+        if (data["f_status"] != 0)
+            data["f_status_s"] = "-";
+        else
+            data["f_status_s"] = "失效";
+
+        data["f_birthday_s"] = eolib.date_2_string(data["f_birthday"]);
+        data["f_entrytime_s"] = eolib.date_2_string(data["f_entrytime"]);
+        data["f_leavetime_s"] = eolib.date_2_string(data["f_leavetime"]);
+
+        let rd = getRoleInfo(data["f_role"]);
+        data["f_role_s"] = rd["roleStr"];
+        data["f_role_d"] = rd["roleIds"];
+    }
 
     const onTableLoading_user = (show: boolean) => {
         x_show_loading.value = show;
@@ -247,15 +248,15 @@ export default { name: "platform_user" }
         }
 
         console.log(data);
-        let userId = data["user_id"];
+        let userId = data["f_user_id"];
         
-        let loginId = eocore.to_string(data["login_id"]);
+        let loginId = eocore.to_string(data["f_login_id"]);
         let pat = /^[a-zA-Z0-9_-]{4,16}$/;
         if (!pat.test(loginId)) {
             eocore.show_error('账号输入不符合[4-16个字符]');
             return;
         }
-        data["login_id"] = loginId;
+        data["f_login_id"] = loginId;
 
         // let loginPsw = data["login_psw"];
         // if (loginPsw.length < 4 || loginPsw.length > 16) {
@@ -263,17 +264,17 @@ export default { name: "platform_user" }
         //     return;
         // }
 
-        if (eocore.check_string(data, "name") <= 0) {
+        if (eocore.check_string(data, "f_name") <= 0) {
             eocore.show_error("姓名不能输入为空");
             cb(false); return;
         }
 
-        if (!eocore.check_id(data, "dept_id")) {
+        if (!eocore.check_id(data, "f_dept_id")) {
             eocore.show_error("请选择部门");
             cb(false); return;
         }
 
-        let roleList = data["role_d"];
+        let roleList = data["f_role_d"];
         if (eocore.check_empty(roleList)) {
             eocore.show_error("请选择角色");
             cb(false); return;
@@ -284,30 +285,21 @@ export default { name: "platform_user" }
             roleIds += "," + d;
         }
         roleIds = roleIds.substring(1);
-        data["role"] = roleIds;
-
-        data["birthday"] = eolib.datetime_2_string(data["birthday"]);
-        data["entrytime"] = eolib.date_2_string(data["entrytime"]);
-        data["leavetime"] = eolib.date_2_string(data["leavetime"]);
+        data["f_role"] = roleIds;
 
         v_table_user.value!.update_data_net("/api/user/upd", {
-            "user_id": userId,
-            "login_id": loginId,
-            "login_psw": "",
-            "name": data["name"],
-            "dept_id": data["dept_id"],
-            "role": data["role"],
-            "sex": data["sex"],
-            "birthday": data["birthday"],
-            "phone": data["phone"],
-            "bphone": data["bphone"],
-            "weixin": data["weixin"],
-            "register": data["register"],
-            "location": data["location"],
-            "entrytime": data["entrytime"],
-            "leavetime": data["leavetime"],
-            "status": data["status"],
-            "note": data["note"]
+            "f_user_id": userId,
+            "f_login_id": loginId,
+            "f_login_psw": "",
+            "f_name": data["f_name"],
+            "f_dept_id": data["f_dept_id"],
+            "f_role": data["f_role"],
+            "f_sex": data["f_sex"],
+            "f_phone": data["f_phone"],
+            "f_location": data["f_location"],
+            "f_status": data["f_status"],
+            "f_note": data["f_note"],
+            "f_data_ex": data["f_data_ex"]
         }, -1, userId <= 0, true);
             
         cb(true);

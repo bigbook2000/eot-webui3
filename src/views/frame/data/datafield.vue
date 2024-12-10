@@ -32,6 +32,7 @@ export default { name: "data_datafield" }
         onButtonClick_Upd,
         onButtonClick_Del,
 
+        onTableItem_field,
         onTableLoading_field,
         onTableRowClick_field,
         onDialogClose_field,
@@ -64,7 +65,7 @@ export default { name: "data_datafield" }
                     </div>
                     <div class="cell">
                         <div class="input_w">
-                            <el-button type="primary" class="eo_w80p" @click="onButtonClick_Load">加载</el-button>
+                            <el-button type="primary" class="eo_w80p" @click="onButtonClick_Load">刷新</el-button>
                         </div>
                         <div class="split"></div>
                         <div class="input_w">
@@ -72,7 +73,7 @@ export default { name: "data_datafield" }
                                 @click="onButtonClick_Add">添加</el-button>
                         </div>
                         <div class="input_w">
-                            <el-button type="primary" class="eo_w80p"
+                            <el-button type="default" class="eo_w80p"
                                 @click="onButtonClick_Del">删除</el-button>
                         </div>
                         <div class="input_w">
@@ -85,19 +86,20 @@ export default { name: "data_datafield" }
             <div class="eo_col_f">
                 <vtable ref="v_table_field" 
                     name="参数字段"
-                    id-field="data_field_id" 
+                    id-field="f_data_field_id" 
+                    :on-item="onTableItem_field"
                     @loading="onTableLoading_field"
                     @row-click="onTableRowClick_field">                    
-                    <el-table-column prop="order" label="顺序" width="80" />
-                    <el-table-column prop="visible" label="显示" width="80" />
-                    <el-table-column prop="type" label="类型" width="100" />
-                    <el-table-column prop="label" label="名称" width="160" />
-                    <el-table-column prop="dname" label="协议参数" width="160" />
-                    <el-table-column prop="kname" label="解析参数" width="160" />
-                    <el-table-column prop="precision" label="精度" width="80" />
-                    <el-table-column prop="unit" label="单位" width="120" />
-                    <el-table-column prop="width" label="宽度" width="120" />
-                    <el-table-column prop="note" label="备注" width="200" show-overflow-tooltip />
+                    <el-table-column prop="f_order" label="顺序" width="80" />
+                    <el-table-column prop="f_visible" label="显示" width="80" />
+                    <el-table-column prop="f_type" label="类型" width="100" />
+                    <el-table-column prop="f_label" label="名称" width="160" />
+                    <el-table-column prop="f_dname" label="协议参数" width="160" />
+                    <el-table-column prop="f_kname" label="解析参数" width="160" />
+                    <el-table-column prop="f_precision" label="精度" width="80" />
+                    <el-table-column prop="f_unit" label="单位" width="120" />
+                    <el-table-column prop="f_width" label="宽度" width="120" />
+                    <el-table-column prop="f_note" label="备注" width="200" show-overflow-tooltip />
                     <el-table-column />
                 </vtable>
             </div>

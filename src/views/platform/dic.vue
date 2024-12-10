@@ -5,9 +5,6 @@
                 <div class="eo_form">
                     <div class="cell">
                         <div class="input_w">
-                            <el-button type="primary" class="eo_w80p" @click="onButtonClick_Import">导入</el-button>
-                        </div>
-                        <div class="input_w">
                             <el-button type="primary" class="eo_w80p" @click="onButtonClick_Export">导出</el-button>
                         </div>
                         <div class="input_w">
@@ -45,11 +42,11 @@
                             <div class="eo_col_f">
                                 <vtable ref="v_table_dic" 
                                     name="类别"
-                                    id-field="dic_id"
+                                    id-field="f_dic_id"
                                     @loading="onTableLoading_dic"
                                     @row-click="onTableRowClick_dic">                                    
-                                    <el-table-column prop="label" label="名称" width="180" />
-                                    <el-table-column prop="note" label="描述" width="200" />
+                                    <el-table-column prop="f_label" label="名称" width="180" />
+                                    <el-table-column prop="f_note" label="描述" width="200" />
                                     <el-table-column />
                                 </vtable>
                             </div>
@@ -79,11 +76,11 @@
                             <div class="eo_col_f">
                                 <vtable ref="v_table_item" 
                                     name="键值"
-                                    id-field="dic_id"
+                                    id-field="f_dic_id"
                                     @loading="onTableLoading_dic">
-                                    <el-table-column prop="label" label="名称" width="280" />                                    
-                                    <el-table-column prop="value" label="键值" width="100" />
-                                    <el-table-column prop="note" label="描述" width="200" />
+                                    <el-table-column prop="f_label" label="名称" width="280" />                                    
+                                    <el-table-column prop="f_value" label="键值" width="100" />
+                                    <el-table-column prop="f_note" label="描述" width="200" />
                                     <el-table-column />
                                 </vtable>
                             </div>
@@ -138,29 +135,29 @@ export default { name: "platform_dic" }
     onMounted(() => {
 
         x_form_types_dic.value = [
-            { type: "input", name: "label", span: 100, label: "名称" },
-            { type: "input", name: "note", span: 100, label: "描述" },
+            { type: "input", name: "f_label", span: 100, label: "名称" },
+            { type: "input", name: "f_note", span: 100, label: "描述" },
         ]
         x_form_types_item.value = [
-            { type: "list", name: "dic_pid", span: 100, label: "类别" },
-            { type: "input", name: "label", span: 100, label: "名称" },
-            { type: "number", name: "value", span: 100, label: "键值", precision: 0, min: 0, max: 999999 },
-            { type: "input", name: "note", span: 100, label: "描述" },
+            { type: "list", name: "f_dic_pid", span: 100, label: "类别", list: [] },
+            { type: "input", name: "f_label", span: 100, label: "名称" },
+            { type: "number", name: "f_value", span: 100, label: "键值", precision: 0, min: 0, max: 999999 },
+            { type: "input", name: "f_note", span: 100, label: "描述" },
         ]
 
         v_table_dic.value!.load_list_net("/api/dic/list", {
-            "dic_pid": 0
+            "f_dic_pid": 1
         });
     })
 
     const onButtonClick_New_dic = () => {
         v_formd_dic.value!.show_dialog({
-            "dic_id": 0,
-            "dic_pid": 0,
-            "level": 0,
-            "label": "",
-            "value": 1,
-            "note": ""
+            "f_dic_id": 0,
+            "f_dic_pid": 1, // 默认是1
+            "f_level": 0,
+            "f_label": "",
+            "f_value": 1,
+            "f_note": ""
         })
     }
     const onButtonClick_Upd_dic = () => {
@@ -172,7 +169,7 @@ export default { name: "platform_dic" }
     const onButtonClick_Del_dic = async () => {
         await v_table_dic.value!.remove_data_net_select("/api/dic/del", (data) => {
             return {
-                "dic_id": data["dic_id"]
+                "f_dic_id": data["f_dic_id"]
             }
         })
 
@@ -183,29 +180,31 @@ export default { name: "platform_dic" }
         let dicPid = 0;
         let dicValue = 0;
         let dicData = v_table_dic.value!.get_select_data();
-        if (dicData != undefined) dicPid = dicData["dic_id"];
+        if (dicData != undefined) dicPid = dicData["f_dic_id"];
 
         // 取一个最大值
         let listItem = v_table_item.value!.get_list();
         for (let d of listItem) {
-            if (dicValue < d["value"]) dicValue = d["value"];
+            if (dicValue < d["f_value"]) dicValue = d["f_value"];
         }
         dicValue++;
 
         v_formd_item.value!.show_dialog({
-            "dic_id": 0,
-            "dic_pid": dicPid,
-            "level": 0,
-            "label": "_新项",
-            "value": dicValue,
-            "note": ""
+            "f_dic_id": 0,
+            "f_dic_pid": dicPid,
+            "f_level": 0,
+            "f_label": "_新项",
+            "f_value": dicValue,
+            "f_note": ""
         })
 
+        // 下拉选择项使用 value-label字段
         let list = v_table_dic.value!.get_list();
         for (let d of list) {
-            d["value"] = d["dic_id"]
+            d["value"] = d["f_dic_id"]
+            d["label"] = d["f_label"]
         }
-        v_formd_item.value!.update_list("dic_pid", list);
+        v_formd_item.value!.update_list("f_dic_pid", list);
     }
     const onButtonClick_Upd_item = () => {
         let itemData = v_table_item.value!.get_select_data();
@@ -216,7 +215,7 @@ export default { name: "platform_dic" }
     const onButtonClick_Del_item = async () => {
         await v_table_item.value!.remove_data_net_select("/api/dic/del", (data) => {
             return {
-                "dic_id": data["dic_id"]
+                "f_dic_id": data["f_dic_id"]
             }
         })
     }
@@ -239,8 +238,10 @@ export default { name: "platform_dic" }
         eolib.download_file(eocore.base_url + "/static/dic" + eodic.version + ".json");
     }
     const onButtonClick_Load = () => {
+
+        // 父节点为1表示类别
         v_table_dic.value!.load_list_net("/api/dic/list", {
-            "dic_pid": 0
+            "f_dic_pid": 1
         });
 
         v_table_item.value!.load_list([]);
@@ -252,7 +253,7 @@ export default { name: "platform_dic" }
 
     const onTableRowClick_dic = (data: any) => {
         v_table_item.value!.load_list_net("/api/dic/list", {
-            "dic_pid": data["dic_id"]
+            "f_dic_pid": data["f_dic_id"]
         })
     }
 
@@ -261,13 +262,13 @@ export default { name: "platform_dic" }
             cb(true); return;
         }
         
-        if (eocore.check_string(data, "label") <= 0) {
+        if (eocore.check_string(data, "f_label") <= 0) {
             eocore.show_error("名称不能输入为空");
             cb(false); return;
         }
 
         v_table_dic.value!.update_data_net(
-            "/api/dic/upd", data, -1, data["dic_id"]<=0, true);
+            "/api/dic/upd", data, -1, data["f_dic_id"]<=0, true);
 
         cb(true);
     }
@@ -276,13 +277,13 @@ export default { name: "platform_dic" }
             cb(true); return;
         }
 
-        if (eocore.check_string(data, "label") <= 0) {
+        if (eocore.check_string(data, "f_label") <= 0) {
             eocore.show_error("名称不能输入为空");
             cb(false); return;
         }
 
         v_table_item.value!.update_data_net(
-            "/api/dic/upd", data, -1, data["dic_id"]<=0, true);
+            "/api/dic/upd", data, -1, data["f_dic_id"]<=0, true);
 
         cb(true);
     }

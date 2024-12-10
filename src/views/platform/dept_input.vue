@@ -52,10 +52,10 @@
         }
 
         let deptData = data.dept;        
-        if (eocore.check_id(deptData, "dept_id")) {
+        if (eocore.check_id(deptData, "f_dept_id")) {
 
             // 选择部门信息
-            x_dept_id_s.value = deptData["name"];
+            x_dept_id_s.value = deptData["f_name"];
 
             emits("change", false, deptData, (result: boolean) => {
             });

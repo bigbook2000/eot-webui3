@@ -92,8 +92,8 @@
         TGlobal.userData = ret.data._list[0];
 
         // 获取权限
-        let permits = TGlobal.userData["permits"];
-        TGlobal.userData["permits"] = "";
+        let permits = TGlobal.userData["f_permits"];
+        TGlobal.userData["f_permits"] = "";
         TGlobal.permitString = permits;
 
         x_login_disable.value = false;

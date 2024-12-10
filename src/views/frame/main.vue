@@ -121,7 +121,7 @@
     onMounted(() => {       
         
         x_main_title.value = TGlobal.appData["main_title"];
-        x_user_name.value = TGlobal.userData["name"];
+        x_user_name.value = TGlobal.userData["f_name"];
 
         x_menu_list.value = loadMenuList();
         //console.log(x_menu_list.value);
@@ -194,19 +194,19 @@
         let lastMenu = undefined;
         for (let d of TGlobal.menuList) {
 
-            if (d["type"] != "menu") continue;
+            if (d["f_type"] != "menu") continue;
 
-            if (!TLogic.checkPermit(d["permit"])) continue;
+            if (!TLogic.checkPermit(d["f_permit"])) continue;
 
-            let menuPid = d['menu_pid'];
+            let menuPid = d['f_menu_pid'];
             if (menuPid == 1) {
 
                 menuListAll.push({
-                    index: 'm' + d['menu_id'],
-                    title: d['name'],
-                    icon: d['icon'],
-                    icon_path: eocore.get_path("/assets/icon/" + d['icon'] + ".png"),
-                    path: d['path'],
+                    index: 'm' + d['f_menu_id'],
+                    title: d['f_name'],
+                    icon: d['f_icon'],
+                    icon_path: eocore.get_path("/assets/icon/" + d['f_icon'] + ".png"),
+                    path: d['f_path'],
                     children: new Array<any>()
                 });
 
@@ -230,11 +230,11 @@
                 }
 
                 lastMenu.children.push({
-                    index: 'm' + d['menu_id'],
-                    title: d['name'],
-                    icon: d['icon'],
-                    icon_path: eocore.get_path("/assets/icon/" + d['icon'] + ".png"),
-                    path: d['path'],
+                    index: 'm' + d['f_menu_id'],
+                    title: d['f_name'],
+                    icon: d['f_icon'],
+                    icon_path: eocore.get_path("/assets/icon/" + d['f_icon'] + ".png"),
+                    path: d['f_path'],
                     children: new Array<any>()
                 });
             }
@@ -289,9 +289,9 @@
     }
 
     const onTabClick_Page = (pane: TabsPaneContext, event: Event) => {
-        //console.log(pane.paneName, pane.index);
+        console.log(pane.paneName, pane.index);
 
-        for (let d of TGlobal.menuList) {            
+        for (let d of TGlobal.menuList) {
             if (pane.paneName == d.path) {
                 router.replace({name: d.path});
                 //x_tab_name.value = d.path;
@@ -323,7 +323,7 @@
         .title {
             padding: 5px 0px;
             font-size: 20px;
-            color: var(--eo_color_light3);
+            color: var(--eo_color_light4);
         }        
         .info {
             padding: 10px 0px;

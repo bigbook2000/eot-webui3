@@ -19,7 +19,7 @@
             <el-tree ref="v_tree_dept"
                 :highlight-current="true"
                 :expand-on-click-node="false"
-                node-key="dept_id"
+                node-key="f_dept_id"
                 :data="x_tree_dept" 
                 :props="x_tree_props" 
                 @node-click="onTreeNodeClick_dept">
@@ -59,18 +59,18 @@
 
     const x_tree_props = {
         children: "children",
-        label: "name",
+        label: "f_name",
     }
     var x_tree_dept = ref<ctree_node[]>([]);
     var x_dept_data = ref({
-        "dept_id": 0,
-        "dept_pid": 0,
-        "name": "",
-        "address": "",
-        "contact": "",
-        "phone": "",
-        "note": "",
-        "status": 1
+        "f_dept_id": 0,
+        "f_dept_pid": 0,
+        "f_name": "",        
+        "f_contact": "",
+        "f_phone": "",
+        "f_note": "",
+        "f_status": 1,
+        "f_data_ex": "{}",
     });
 
     const emits = defineEmits<{
@@ -84,16 +84,16 @@
         x_show_dialog.value = true;
 
         m_dialog_data = Object.assign({}, data);
-        x_dept_data = ref({
-            "dept_id": 0,
-            "dept_pid": 0,
-            "name": "",
-            "address": "",
-            "contact": "",
-            "phone": "",
-            "note": "",
-            "status": 1
-        });
+        x_dept_data.value = {
+            "f_dept_id": 0,
+            "f_dept_pid": 0,
+            "f_name": "",
+            "f_contact": "",
+            "f_phone": "",
+            "f_note": "",
+            "f_status": 1,
+            "f_data_ex": "{}",
+        };
         loadTree_dept();
     }
 
@@ -127,14 +127,14 @@
     const loadTree_dept = async () => {
 
         let ret:any = await eocore.post("/api/dept/list", [{
-            "dept_pid": 1
+            "f_dept_pid": 1
         }])
 
         let list = eocore.check_net_array(ret);
         if (list == undefined) return;
 
         let tree: any[] = [];
-        eolib.list_2_tree(list, tree, "dept_id", "dept_pid");
+        eolib.list_2_tree(list, tree, "f_dept_id", "f_dept_pid");
         x_tree_dept.value = tree;
     }
 

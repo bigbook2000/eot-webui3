@@ -47,30 +47,6 @@ const doVue_Mounted = async () => {
     
     await netLoad_datafield_list();
 
-    v_table_data.value!.init_table({
-        on_item: (data) => {
-            data["dtime_s"] = eolib.datetime_2_string(data["dtime"]);
-            data["datatime_s"] = eolib.datetime_2_string(data["datatime"]);
-            data["qn_s"] = eolib.datetime_2_string(data["qn"]);
-
-            // 格式化数据
-            TLogic.formatDeviceData(data);
-        },
-        on_page: (n: number): number => {
-            x_row_total_data.value = n;
-            return n;
-        }
-    })
-
-    v_table_device.value!.init_table({
-        on_item: (data) => {
-        },
-        on_page: (n: number): number => {
-            x_row_total_device.value = n;
-            return n;
-        }
-    })
-
     netLoad_device_query(-1);
 }
 
@@ -78,7 +54,7 @@ const netLoad_datafield_list = async () => {
 
     // 先读取数据字段参数清单
     let ret = await eocore.proc("np_datafield_list", {
-        "v_dept_id": TGlobal.userData["dept_id"],
+        "v_dept_id": TGlobal.userData["f_dept_id"],
         "v_type": x_query_type.value
     })
     let list = eocore.check_net_array(ret);
@@ -99,16 +75,19 @@ const netLoad_device_query = (pageIndex: number) => {
     let rowIndex = pageIndex * pageRowCount;
     if (pageIndex < 0) x_page_index_device.value = 1;
 
+    // 分页使用 s_page_row_index 和 s_page_row_count
     v_table_device.value!.load_list_proc("np_device_query", {
         "v_dkey": x_query_dkey.value,
+        "v_dtype": "",
+        "v_dversion": "",
         "v_mn": x_query_mn.value,
         "v_name": x_query_name.value,
         "v_version_code": x_query_version.value,
         "v_start_ctime": "2020-01-01 00:00:00",
         "v_end_ctime": "2050-01-01 00:00:00",
         "v_order_by": orderBy,
-        "v_page_row_index": rowIndex,
-        "v_page_row_count": pageRowCount
+        "s_page_row_index": rowIndex,
+        "s_page_row_count": pageRowCount
     });
 }
 
@@ -121,7 +100,7 @@ const netLoad_data_query = (pageIndex: number) => {
     let deviceData = v_table_device.value!.get_select_data(true);
     if (deviceData == undefined) return;
 
-    let deviceId = deviceData["device_id"];
+    let deviceId = deviceData["f_device_id"];
 
     let pageRowCount = x_page_row_count_data.value;
     let rowIndex = pageIndex * pageRowCount;
@@ -134,9 +113,30 @@ const netLoad_data_query = (pageIndex: number) => {
         "v_type": x_query_type.value,
         "v_start_time": startTime,
         "v_end_time": endTime,
-        "v_page_row_index": rowIndex,
-        "v_page_row_count": pageRowCount
+        "v_order_by": " order by f_data_id desc",
+        "s_page_row_index": rowIndex,
+        "s_page_row_count": pageRowCount
     });
+}
+
+
+const onTableItem_data = (data: any) => {
+    data["f_dtime_s"] = eolib.datetime_2_string(data["f_dtime"]);
+    data["f_datatime_s"] = eolib.datetime_2_string(data["f_datatime"]);
+    data["f_qn_s"] = eolib.datetime_2_string(data["f_qn"]);
+
+    // 格式化数据
+    TLogic.formatDeviceData(data);
+}
+const onTablePage_data = (n: number): number => {
+    x_row_total_data.value = n;
+    return n;
+}
+const onTableItem_device = (data: any) => {
+}
+const onTablePage_device = (n: number): number => {
+    x_row_total_device.value = n;
+    return n;
 }
 
 const onButtonClick_Load_data = () => {
@@ -211,10 +211,14 @@ export const tsInit = () => {
         onButtonClick_Load_data,
         onButtonClick_Load_device,
         
+        onTableItem_data, 
+        onTablePage_data, 
         onTableLoading_data,
         onTableRowClick_data,
         onPageChange_data,
 
+        onTableItem_device,
+        onTablePage_device,
         onTableLoading_device,
         onTableRowClick_device,
         onPageChange_device,

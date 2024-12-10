@@ -37,7 +37,7 @@
         if (array == undefined) array = [];
             
         for (let d of array) {
-            TGlobal.settingList[d["key"]] = d["value"];
+            TGlobal.settingList[d["f_key"]] = d["f_value"];
         }
 
         console.log(TGlobal.settingList);
@@ -49,6 +49,11 @@
 
         let array = eocore.check_net_array(ret);
         if (array == undefined) array = new Array();
+
+        for (let d of array) {
+            // 兼容
+            d.path = d["f_path"];
+        }
             
         TGlobal.menuList = array;
     }
@@ -68,7 +73,8 @@
         console.log(TGlobal.appData);
         window.document.title = TGlobal.appData["main_title"];
 
-        eocore.base_url = "http://111.14.43.12:56901";
+        // 通过外部配置API地址接口
+        eocore.base_url = TGlobal.appData["api_url"];
 
         await netLoad_setting_list();
         await netLoad_menu_list();

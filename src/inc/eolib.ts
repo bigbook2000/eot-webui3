@@ -2,6 +2,35 @@ import eocore from "./eocore";
 
 export default {
 
+	/**
+	 * 用s1, s2切分字符串，用于路径分析
+	 * @param str 
+	 * @param s1 
+	 * @param s2 
+	 * @returns 
+	 */
+	string_part_last(str: string, s1: string, s2: string): string[] {
+
+		var ss: string[] = ["", "", ""];
+
+		let pos1 = str.lastIndexOf(s1);
+		let pos2 = str.lastIndexOf(s2);
+
+		if (pos1 > pos2) pos2 = -1;
+		if (pos1 != -1) {
+			ss[0] = str.substring(0, pos1);
+			ss[1] = str.substring(pos1 + 1);
+		}
+
+		if (pos2 != -1) {
+			let s: string = ss[1];
+			ss[1] = s.substring(0, pos2);
+			ss[2] = s.substring(pos2 + 1);
+		}
+
+		return ss;
+	},
+
     /**
      * 根据指定的对象字段值，返回数组索引
      * @param list list

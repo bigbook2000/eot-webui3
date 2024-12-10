@@ -69,9 +69,12 @@
         });
     }
     const onButtonClick_Ok = () => {
+
+        x_show_dialog.value = true;
         emits("close", false, m_dialog_tag, (result: boolean) => {
             x_show_dialog.value = !result;
-        });        
+            x_show_dialog.value = false;
+        });
     }
 
     defineExpose({
