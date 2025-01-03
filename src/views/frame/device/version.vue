@@ -18,7 +18,7 @@
                     <div class="eo_col_f">
                         <vtable ref="v_table_type" 
                             name="类型"
-                            id-field="f_type_id"
+                            id-field="f_dtype_id"
                             @loading="onTableLoading_version"
                             @row-click="onTableRowClick_type">                                    
                             <el-table-column prop="f_dtype" label="名称" width="120" />
@@ -67,7 +67,7 @@
                     <div class="eo_col_f">
                         <vtable ref="v_table_version" 
                             name="版本"
-                            id-field="f_version_id"
+                            id-field="f_dversion_id"
                             :on-item="onTableItem_version"
                             @loading="onTableLoading_version">
                             <el-table-column prop="f_dversion" label="名称" width="120" />
@@ -84,7 +84,7 @@
                                         @click="onTableButtonClick_Config(scope.$index, scope.row)">配置</el-button>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="f_note" label="描述" width="240" />
+                            <el-table-column prop="f_note" label="描述" width="400" show-overflow-tooltip />
                             <el-table-column />
                         </vtable>
                     </div>
@@ -170,7 +170,7 @@ export default { name: "device_version" }
     const onButtonClick_New_type = () => {
 
         v_formd_type.value!.show_dialog({
-            "f_type_id": 0,
+            "f_dtype_id": 0,
             "f_dtype": "",
             "f_note": ""
         });
@@ -178,7 +178,7 @@ export default { name: "device_version" }
     const onButtonClick_Del_type = () => {
         v_table_type.value!.remove_data_proc_select("np_dtype_del", (data) => {
             return {
-                "v_type_id": data["f_type_id"]
+                "v_dtype_id": data["f_dtype_id"]
             }
         });
     }
@@ -196,8 +196,8 @@ export default { name: "device_version" }
         if (typeData == undefined) return;
 
         v_formd_version.value!.show_dialog({
-            "f_version_id": 0,
-            "f_type_id": typeData["f_type_id"],
+            "f_dversion_id": 0,
+            "f_dtype_id": typeData["f_dtype_id"],
             "f_dtype": typeData["f_dtype"],
             "f_dversion": "",
             "f_bin_file": "",
@@ -208,7 +208,7 @@ export default { name: "device_version" }
     const onButtonClick_Del_version = () => {
         v_table_version.value!.remove_data_proc_select("np_dversion_del", (data) => {
             return {
-                "v_version_id": data["f_version_id"]
+                "v_version_id": data["f_dversion_id"]
             }
         });
     }
@@ -233,7 +233,7 @@ export default { name: "device_version" }
     const onTableRowClick_type = async (data: any) => {
 
         x_show_loading.value = true;
-        let list = await TLogic.getVersionList(data["f_type_id"]);
+        let list = await TLogic.getVersionFiles(data["f_dtype_id"]);
         x_show_loading.value = false;
 
         v_table_version.value!.load_list(list);
@@ -250,10 +250,10 @@ export default { name: "device_version" }
         }
 
         v_table_type.value!.update_data_proc("np_dtype_upd", {
-            "v_type_id": data["f_type_id"],
+            "v_dtype_id": data["f_dtype_id"],
             "v_dtype": data["f_dtype"],
             "v_note": data["f_note"]
-        }, -1, data["f_type_id"] <= 0, true);
+        }, -1, data["f_dtype_id"] <= 0, true);
 
         cb(true);
     }
@@ -268,13 +268,13 @@ export default { name: "device_version" }
         }
         
         v_table_version.value!.update_data_proc("np_dversion_upd", {
-            "v_version_id": data["f_version_id"],
-            "v_type_id": data["f_type_id"],
+            "v_dversion_id": data["f_dversion_id"],
+            "v_dtype_id": data["f_dtype_id"],
             "v_dversion": data["f_dversion"],
             "v_bin_file": data["f_bin_file"],
             "v_config_data": data["f_config_data"],
             "v_note": data["f_note"]
-        }, -1, data["f_type_id"] <= 0, true);
+        }, -1, data["f_dtype_id"] <= 0, true);
 
         cb(true);
     }

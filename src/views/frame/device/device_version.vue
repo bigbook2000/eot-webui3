@@ -61,9 +61,9 @@
                             @change="onSelectChange_type">
                             <el-option
                                 v-for="item in x_list_type"
-                                :key="item['f_type_id']"
+                                :key="item['f_dtype_id']"
                                 :label="item['f_dtype']"
-                                :value="item['f_type_id']">
+                                :value="item['f_dtype_id']">
                             </el-option>
                         </el-select>
                     </div>
@@ -173,9 +173,15 @@
         // 测试
         url = url.replace(eocore.base_url, "http://127.0.0.1:56908");
 
+        // 先将版本配置更新到设备配置
+        let mn = x_device_data["f_mn"];
+        let ret;
+
         x_show_loading.value = true;
-        let ret = await eocore.post("/iot/gate/iot/version/update", [{
-            "mn": x_device_data["f_mn"],
+
+        // 发送升级命令
+        ret = await eocore.post("/iot/gate/iot/version/update", [{
+            "mn": mn,
             "type": dataVersion["f_dtype"],
             "version": dataVersion["f_dversion"],
             "total": dataVersion["f_total"],
@@ -196,7 +202,7 @@
     const onSelectChange_type = async (val: any) => {
 
         x_show_loading.value = true;
-        let list = await TLogic.getVersionList(val);
+        let list = await TLogic.getVersionFiles(val);
         x_show_loading.value = false;
 
         v_table_version.value!.load_list(list);

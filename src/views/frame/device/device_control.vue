@@ -1,7 +1,7 @@
 <template>
     <!-- 设备配置 -->
     <el-dialog v-model="x_show_dialog" 
-        width="900px"
+        width="800px"
         :show-close="false" 
         :align-center="true"
         :close-on-click-modal="false"
@@ -10,7 +10,7 @@
         <template #header="{ close }">
             <div class="sv_dialog_head">
                 <div class="title">
-                    <span>配置</span>
+                    <span>控制</span>
                 </div>
                 <div class="close" @click="onButtonClick_Cancel">
                     <div class="icon"></div>
@@ -50,12 +50,21 @@
                         readonly></el-input>
                 </div>
             </div>
-            <div class="cell eo_w100">
-                <div class="label_n">配置</div>
+            <!-- 实时数据 -->
+            <div class="cell eo_w4" v-for="item in x_data_fields" :key="item['f_dname']">
+                <div class="label_n">{{ item['f_label'] }}</div>
                 <div class="input">
-                    <el-input style="width:100%"
-                        v-model="x_device_data['f_config_data_s']" type="textarea" resize="none"
-                        :row="4" :autosize="{minRows: 20, maxRows: 20}"></el-input>
+                    <el-input :value="x_device_data.dataList[item['f_dname']]" style="width:100%"
+                        readonly></el-input>
+                </div>
+            </div>
+            <div class="cell eo_w100">
+            </div>
+            <div class="cell eo_w4" v-for="item in x_output_fields" :key="item['f_dname']">
+                <div class="input">
+                    <el-button type="default" class="eo_w100" @click="onButtonClick_Cancel">
+                        {{ item['f_label'] }}
+                    </el-button>
                 </div>
             </div>
         </div>
@@ -63,12 +72,6 @@
             <div class="sv_dialog_foot">
                 <div class="button">
                     <el-button type="default" class="eo_w100" @click="onButtonClick_Cancel">关闭</el-button>
-                </div>
-                <div class="button">
-                    <el-button type="primary" class="eo_w100" @click="onButtonClick_ConfigGet">同步</el-button>
-                </div>
-                <div class="button">
-                    <el-button type="primary" class="eo_w100" @click="onButtonClick_ConfigSet">上传</el-button>
                 </div>
             </div>
         </div>
@@ -81,6 +84,7 @@
     import eocore from "@/inc/eocore";
 
     import type {cfunc_boolean} from "@/inc/eotypes";
+    import TGlobal from "@/logic/TGlobal";
     import TLogic from "@/logic/TLogic";
 
     const emits = defineEmits<{
@@ -92,38 +96,30 @@
     });
     var x_show_loading = ref(false);
 
-    onMounted(() => {
+    /** 数据字段 */
+    var x_data_fields = ref<any[]>([]);
+    /** 控制字段，以TGPOut开头 */
+    var x_output_fields = ref<any[]>([]);
+
+    onMounted(async () => {
+
+        let ret = await eocore.proc("np_datafield_list", {
+            "v_dept_id": TGlobal.userData["f_dept_id"],
+            "v_type": '2011'
+        })
+        let list = eocore.check_net_array(ret);
+        if (list != undefined) {
+            x_data_fields.value = list;
+
+            let list2 = [];
+            for (let d of list) {
+                if (d["f_dname"].startsWith("TGPOut")) {
+                    list2.push(d);
+                }
+            }
+            x_output_fields.value = list2;
+        }        
     });
-
-    const updateConfigData = (cpStr: string): string => {
-
-        //console.log(cpStr);
-        let cpArray: string[] = cpStr.split(";");
-
-        let pos;
-        let key, val;
-        // 解析配置参数
-        cpStr = "";
-        for (let s of cpArray) {
-
-            pos = s.indexOf("=");
-            if (pos < 0) continue;
-            
-            key = s.substring(0, pos);
-            val = s.substring(pos+1);            
-
-            // if (key.startsWith("_")) {
-            //     if (key == "_DKey") x_device_data["f_dkey"] = val;
-            //     if (key == "_DType") x_device_data["f_dtype"] = val;
-            //     if (key == "_DVersion") x_device_data["f_dversion"] = val;
-            // } 
-
-            cpStr += key + "=" + val + ";\r\n";
-        }
-
-        //console.log(cpStr);
-        return cpStr;
-    }
 
     const show_dialog = async (data: any) => {
 
@@ -132,8 +128,8 @@
         
         // 创建一个副本
         let dataNew = Object.assign({}, data);
+        console.log(dataNew);
         
-        dataNew["f_config_data_s"] = TLogic.configDataDecode(dataNew["f_config_data"]);
         x_device_data = reactive(dataNew);        
     }
 
@@ -147,24 +143,6 @@
         });
     }
     /**
-     * 点击同步按钮
-     */
-    const onButtonClick_ConfigGet = async () => {
-
-        x_show_loading.value = true;
-        let ret = await eocore.post("/iot/gate/iot/command", [{
-            "mn": x_device_data["f_mn"],
-            "st": "39",
-            "cn": "3020",
-            "cp": ""
-        }]);
-        x_show_loading.value = false;
-        let data = eocore.check_net_object(ret);        
-        if (data == null) return;
-
-        x_device_data["f_config_data"] = updateConfigData(data["cp"]);
-    }
-    /**
      * 点击配置按钮
      */
     const onButtonClick_ConfigSet = async () => {
@@ -172,35 +150,35 @@
         let dret = await eocore.show_confirm("确信要上传配置信息到设备吗？");
         if (!dret) return;
 
-        let mn = x_device_data["f_mn"];
-        let configData: string = x_device_data["f_config_data_s"];
-        let jsonStr = TLogic.configDataEncode(configData);
+    //     let mn = x_device_data["f_mn"];
+    //     let configData: string = x_device_data["f_config_data_s"];
+    //     let jsonStr = TLogic.configDataEncode(configData);
 
-        // 先保存配置
-        //console.log(configData);
+    //     // 先保存配置
+    //     //console.log(configData);
         
-        let ret;
+    //     let ret;
 
-        x_show_loading.value = true;
-        ret = await eocore.proc("np_config_set", {
-            "v_dkey": x_device_data["f_dkey"],
-            "v_config_data": jsonStr
-        });
+    //     x_show_loading.value = true;
+    //     ret = await eocore.proc("np_config_set", {
+    //         "v_dkey": x_device_data["f_dkey"],
+    //         "v_config_data": jsonStr
+    //     });
 
-        // 和升级保持一直，但不传bin文件长度
-       ret = await eocore.post("/iot/gate/iot/version/update", [{
-           "mn": mn,
-           "type": "",
-           "version": "",
-           "total": 0,
-           "sign": "",
-           "url": "",
-       }]);
-       x_show_loading.value = false;
-       let data = await eocore.check_net_object(ret);
-       if (data == null) return;
+    //     // 和升级保持一直，但不传bin文件长度
+    //    ret = await eocore.post("/iot/gate/iot/version/update", [{
+    //        "mn": mn,
+    //        "type": "",
+    //        "version": "",
+    //        "total": 0,
+    //        "sign": "",
+    //        "url": "",
+    //    }]);
+    //    x_show_loading.value = false;
+    //    let data = await eocore.check_net_object(ret);
+    //    if (data == null) return;
 
-        eocore.show_success("配置命令已发出，请稍后检查设备状态");
+    //     eocore.show_success("配置命令已发出，请稍后检查设备状态");
     }
 
     defineExpose({

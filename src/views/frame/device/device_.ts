@@ -10,6 +10,7 @@ import TLogic from "@/logic/TLogic";
 import vtable from "@/logic/common/vtable.vue"
 
 import device_info from "@/views/frame/device/device_info.vue"
+import device_control from "@/views/frame/device/device_control.vue"
 import device_config from "@/views/frame/device/device_config.vue"
 import device_version from "@/views/frame/device/device_version.vue"
 
@@ -17,6 +18,7 @@ type t_table = InstanceType<typeof vtable>;
 const v_table_device = ref<t_table>();
 
 const v_device_info = ref<InstanceType<typeof device_info>>();
+const v_device_control = ref<InstanceType<typeof device_control>>();
 const v_device_config = ref<InstanceType<typeof device_config>>();
 const v_device_version = ref<InstanceType<typeof device_version>>();
 
@@ -38,19 +40,19 @@ var x_data_fields = ref<any[]>([]);
 
 /** 排序数组 */
 var m_orderby_list = [{
-    name: "mn",
+    name: "f_mn",
     field: "`n_device`.`f_mn`"
 }, {
-    name: "name",
+    name: "f_name",
     field: "`n_device`.`f_name`"
 }, {
-    name: "dept_id_s",
+    name: "f_dept_id_s",
     field: "`n_device`.`f_dept_id`"
 }, {
-    name: "version_id_s",
-    field: "`n_device`.`f_version_id`"
+    name: "f_version_id_s",
+    field: "`n_device`.`f_dversion_id`"
 }, {
-    name: "ctime_s",
+    name: "f_ctime_s",
     field: "`n_device`.`f_ctime`"
 }];
 
@@ -112,7 +114,7 @@ const getEmpty_device = (): any => {
         "f_name": "",
         "f_dept_id": 0,
         "f_dept_id_s": "",            
-        "f_version_id": 0,
+        "f_dversion_id": 0,
         "f_config_data": "",
         "f_ctime": "",            
         "f_enable": 1,
@@ -120,7 +122,7 @@ const getEmpty_device = (): any => {
     }
 }
 
-const netLoad_device_query = (pageIndex: number) => {
+const netLoad_device_query = async (pageIndex: number) => {
 
     let orderBy = getOrderByString();
     console.log(orderBy)
@@ -129,7 +131,9 @@ const netLoad_device_query = (pageIndex: number) => {
     let rowIndex = pageIndex * pageRowCount;
     if (pageIndex < 0) x_page_index.value = 1;
 
-    v_table_device.value!.load_list_proc("np_device_query", {        
+    let ret;
+    x_show_loading.value = true;
+    ret = await eocore.proc("np_device_query", {        
         "v_dkey": x_query_dkey.value,
         "v_dtype": x_query_dtype.value,
         "v_dversion": x_query_dversion.value,
@@ -141,6 +145,15 @@ const netLoad_device_query = (pageIndex: number) => {
         "_page_row_index": rowIndex,
         "_page_row_count": pageRowCount
     });
+
+    let list = eocore.check_net_array(ret);
+    if (list == null) list = [];
+
+    await TLogic.getVersionNames(list);
+
+    v_table_device.value!.load_list(list);
+
+    x_show_loading.value = false;
 }
 
 const onButtonClick_Load = () => {
@@ -214,6 +227,18 @@ const onButtonClick_Config = async () => {
     v_device_config.value!.show_dialog(deviceData);
 }
 
+/**
+ * 向设备发送控制命令
+ */
+const onButtonClick_Control = async () => {
+
+    let deviceData = v_table_device.value!.get_select_data(true);
+    if (deviceData == undefined) return;
+
+    v_device_control.value!.show_dialog(deviceData);
+}
+
+
 const onTableItem_device = (data: any) => {
     data["f_ctime_s"] = eolib.datetime_2_string(data["f_ctime"]);
     data["f_dtime_s"] = eolib.datetime_2_string(data["f_dtime"]);
@@ -268,6 +293,13 @@ const onPageChange_device = (pageIndex: number) => {
     netLoad_device_query(pageIndex - 1);
 }
 
+/**
+ * 关闭设备信息对话框
+ * @param cancel 
+ * @param data 
+ * @param cb 
+ * @returns 
+ */
 const onDialogClose_device = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
     if (cancel) {
         cb(true); return;
@@ -304,6 +336,20 @@ const onDialogClose_device = async (cancel: boolean, data: any, cb: cfunc_boolea
     cb(true);
 }
 
+/**
+ * 关闭控制对话框
+ * @param cancel 
+ * @param data 
+ * @param cb 
+ */
+const onDialogClose_control = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
+    if (cancel) {
+        cb(true); return;
+    }
+
+    cb(true);
+}
+
 const onDialogClose_config = async (cancel: boolean, data: any, cb: cfunc_boolean) => {
     if (cancel) {
         cb(true); return;
@@ -328,6 +374,7 @@ export const tsInit = () => {
         v_table_device,
 
         v_device_info,
+        v_device_control,
         v_device_config,
         v_device_version,
 
@@ -352,7 +399,8 @@ export const tsInit = () => {
         onButtonClick_Del,
         
         onButtonClick_Update,
-        onButtonClick_Config,        
+        onButtonClick_Config,
+        onButtonClick_Control,
 
         onTableItem_device,
         onTablePage_device,
@@ -362,6 +410,7 @@ export const tsInit = () => {
 
         onPageChange_device,
         onDialogClose_device,
+        onDialogClose_control,
         onDialogClose_config,
         onDialogClose_version,
     }

@@ -34,7 +34,7 @@
                 <div class="label_n">配置</div>
                 <div class="input">
                     <el-input style="width:100%"
-                        v-model="x_version_data['f_config_data']" type="textarea" resize="none"
+                        v-model="x_version_data['f_config_data_s']" type="textarea" resize="none"
                         :row="4" :autosize="{minRows: 20, maxRows: 20}"></el-input>
                 </div>
             </div>
@@ -63,6 +63,7 @@
     import eocore from "@/inc/eocore";
 
     import type {cfunc_boolean} from "@/inc/eotypes";
+    import TLogic from "@/logic/TLogic";
 
     const emits = defineEmits<{
         (e: "close", cancel: boolean, data: any, cb: cfunc_boolean): void
@@ -76,36 +77,6 @@
     onMounted(() => {
     });
 
-    const updateConfigData = (cpStr: string): string => {
-
-        //console.log(cpStr);
-        let cpArray: string[] = cpStr.split(";");
-
-        let pos;
-        let key, val;
-        // 解析配置参数
-        cpStr = "";
-        for (let s of cpArray) {
-
-            pos = s.indexOf("=");
-            if (pos < 0) continue;
-            
-            key = s.substring(0, pos);
-            val = s.substring(pos+1);            
-
-            if (key.startsWith("D")) {
-                if (key == "DKey") x_version_data["f_dkey"] = val;
-                if (key == "DType") x_version_data["f_dtype"] = val;
-                if (key == "DVersion") x_version_data["f_dversion"] = val;
-            } else {
-                cpStr += key + "=" + val + ";\r\n";
-            }
-        }
-
-        //console.log(cpStr);
-        return cpStr;
-    }
-
     const show_dialog = async (data: any) => {
 
         // 先打开对话框
@@ -113,8 +84,9 @@
         
         // 创建一个副本
         let dataNew = Object.assign({}, data);
-        dataNew["f_config_data"] = updateConfigData(dataNew["f_config_data"]);
-        x_version_data = reactive(dataNew);        
+
+        dataNew["f_config_data_s"] = TLogic.configDataDecode(dataNew["f_config_data"]);
+        x_version_data = reactive(dataNew);
     }
 
     const onDialogOpened = () => {
@@ -128,17 +100,13 @@
     }
     const onButtonClick_Save = async () => {
 
-        let configData: string = x_version_data["f_config_data"];
-        configData = configData.replace(/[\r\n]/g, "");
-        configData = updateConfigData(configData);
-        x_version_data["f_config_data"] = configData;
-
-        let cpStr = configData.replace(/[\r\n]/g, "");
+        let configData: string = x_version_data["f_config_data_s"];
+        let jsonStr = TLogic.configDataEncode(configData);
 
         x_show_loading.value = true;
         let ret = await eocore.proc("np_dversion_config", {
-            "v_version_id": x_version_data["f_version_id"],
-            "v_config_data": cpStr
+            "v_dversion_id": x_version_data["f_dversion_id"],
+            "v_config_data": jsonStr
         });
         x_show_loading.value = false;
         let data = eocore.check_net_object(ret);

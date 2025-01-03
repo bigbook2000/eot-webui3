@@ -15,11 +15,14 @@ export default { name: "data_datalist" }
 
     import { tsInit } from "./datalist_"
 
+    import tchartline from "@/views/comm/tchartline.vue"
+
     /** 避免vue代码过大  */
     const 
     {
         v_table_data,
         v_table_device,
+        v_tchartline,
 
         x_data_fields,
 
@@ -105,8 +108,9 @@ export default { name: "data_datalist" }
                             </div>
                         </div>
                     </div>
-                    <div class="eo_col_d" style="height:200px;">
+                    <div class="eo_col_d" style="height:240px;">
                         <!-- 图表 -->
+                        <tchartline ref="v_tchartline" style="width:100%;height:100%;" />
                     </div>
                     <div class="eo_col_f">
                         <vtable ref="v_table_data" 
@@ -115,16 +119,16 @@ export default { name: "data_datalist" }
                             :on-item="onTableItem_data"
                             :on-page="onTablePage_data"
                             @loading="onTableLoading_data"
-                            @row-click="onTableRowClick_data">
-                            <el-table-column prop="f_dtime_s" label="更新时间" width="180" />
+                            @row-click="onTableRowClick_data">                            
+                            <el-table-column prop="f_datatime_s" label="数据时间" width="180" />
                             <el-table-column v-for="item in x_data_fields" :key="item['f_dname']"
                                 :prop="item['f_dname']" :label="item['f_label']" :width="item['f_width']">
                                 <template #default="scope">                            
                                     <span>{{ scope.row.dataList[item['f_dname']] }}</span>
                                 </template>
                             </el-table-column>
-                            <el-table-column prop="f_datatime_s" label="设备时间" width="180" />
-                            <el-table-column prop="f_sqn_s" label="数据时间" width="180" />
+                            <el-table-column prop="f_dtime_s" label="更新时间" width="180" />
+                            <el-table-column prop="f_qn_s" label="设备时间" width="180" />                            
                             <el-table-column />
                         </vtable>
                     </div>
@@ -183,7 +187,7 @@ export default { name: "data_datalist" }
                             <el-table-column prop="f_mn" label="MN" sortable width="200" />
                             <el-table-column prop="f_name" label="名称" sortable width="200" />
                             <el-table-column prop="f_dept_id_s" label="部门" sortable width="140" />
-                            <el-table-column prop="f_version_id_s" label="版本" sortable width="160" />                    
+                            <el-table-column prop="f_dversion_id_s" label="版本" sortable width="160" />                    
                             <el-table-column prop="f_ctime_s" label="创建时间" sortable width="180" />
                             <el-table-column prop="f_dkey" label="设备标识" width="400" />
                             <el-table-column />

@@ -9,6 +9,12 @@ import TLogic from "@/logic/TLogic";
 
 import vtable from "@/logic/common/vtable.vue"
 
+
+
+import tchartline from "@/views/comm/tchartline.vue"
+const v_tchartline = ref<InstanceType<typeof tchartline>>();
+
+
 type t_table = InstanceType<typeof vtable>;
 const v_table_data = ref<t_table>();
 const v_table_device = ref<t_table>();
@@ -95,7 +101,7 @@ const netLoad_device_query = (pageIndex: number) => {
  * 查询历史数据
  * @param pageIndex 
  */
-const netLoad_data_query = (pageIndex: number) => {
+const netLoad_data_query = async (pageIndex: number) => {
 
     let deviceData = v_table_device.value!.get_select_data(true);
     if (deviceData == undefined) return;
@@ -108,7 +114,7 @@ const netLoad_data_query = (pageIndex: number) => {
 
     let startTime = eolib.date_start(x_query_date.value[0]);
     let endTime = eolib.date_end(x_query_date.value[1]);
-    v_table_data.value!.load_list_proc("np_data_query", {
+    let list = await v_table_data.value!.load_list_proc("np_data_query", {
         "v_device_id": deviceId,
         "v_type": x_query_type.value,
         "v_start_time": startTime,
@@ -117,13 +123,21 @@ const netLoad_data_query = (pageIndex: number) => {
         "s_page_row_index": rowIndex,
         "s_page_row_count": pageRowCount
     });
+
+    //console.log(list);
+    let dfs = x_data_fields.value;
+    let dns: string[] = [];
+    for (let df of dfs) {
+        dns.push(df["f_dname"]);
+    }
+    v_tchartline.value?.update_data(list, "dataList", "f_datatime_s", dns);
 }
 
 
 const onTableItem_data = (data: any) => {
     data["f_dtime_s"] = eolib.datetime_2_string(data["f_dtime"]);
-    data["f_datatime_s"] = eolib.datetime_2_string(data["f_datatime"]);
-    data["f_qn_s"] = eolib.datetime_2_string(data["f_qn"]);
+    data["f_datatime_s"] = eolib.datetime_2_short(data["f_datatime"]);
+    data["f_qn_s"] = eolib.datetime_2_string(data["f_qn"]);    
 
     // 格式化数据
     TLogic.formatDeviceData(data);
@@ -188,6 +202,7 @@ export const tsInit = () => {
 
         v_table_data,
         v_table_device,
+        v_tchartline,
 
         x_data_fields,
 

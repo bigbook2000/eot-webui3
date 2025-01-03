@@ -69,7 +69,7 @@
 
         // |分割
         x_version_data['f_bin_file_s'] = 
-            0 + "|" + TLogic.FILE_EOTAPP_BIN + "|" + x_version_data['f_version_id'] + "|0";
+            0 + "|" + TLogic.FILE_EOTAPP_BIN + "|" + x_version_data['f_dversion_id'] + "|0";
     }
 
     const onDialogOpened = () => {

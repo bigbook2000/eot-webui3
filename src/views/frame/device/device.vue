@@ -11,6 +11,7 @@ export default { name: "device_list" }
     import vtable from "@/logic/common/vtable.vue"
 
     import device_info from "@/views/frame/device/device_info.vue"
+    import device_control from "@/views/frame/device/device_control.vue"
     import device_config from "@/views/frame/device/device_config.vue"
     import device_version from "@/views/frame/device/device_version.vue"
 
@@ -22,8 +23,9 @@ export default { name: "device_list" }
         v_table_device,
 
         v_device_info,
+        v_device_control,
         v_device_config,
-        v_device_version,
+        v_device_version,        
 
         x_data_fields,
 
@@ -47,6 +49,7 @@ export default { name: "device_list" }
         
         onButtonClick_Update,
         onButtonClick_Config,
+        onButtonClick_Control,
 
         onTableItem_device,
         onTablePage_device,        
@@ -56,6 +59,7 @@ export default { name: "device_list" }
 
         onPageChange_device,
         onDialogClose_device,
+        onDialogClose_control,
         onDialogClose_config,
         onDialogClose_version,
     } 
@@ -132,7 +136,20 @@ export default { name: "device_list" }
                     </div>
                 </div>                
                 <div class="eo_form">
-                    <div class="cell">
+                    <div class="cell">                        
+                        <div class="input_w">
+                            <vbuttonk type="default" class="input_w" permit="device.list.upd" 
+                                @click="onButtonClick_Update">升级</vbuttonk>
+                        </div>
+                        <div class="input_w">
+                            <vbuttonk type="default" class="input_w" permit="device.list.upd" 
+                                @click="onButtonClick_Config">配置</vbuttonk>
+                        </div>
+                        <div class="input_w">
+                            <vbuttonk type="primary" class="input_w" permit="device.list.upd" 
+                                @click="onButtonClick_Control">控制</vbuttonk>
+                        </div>
+                        <div class="split"></div>
                         <div class="input_w">
                             <vbuttonk type="primary" class="input_w" permit="device.list.upd" 
                                 @click="onButtonClick_Add">添加</vbuttonk>
@@ -144,15 +161,6 @@ export default { name: "device_list" }
                         <div class="input_w">
                             <vbuttonk type="primary" class="input_w" permit="device.list.upd" 
                                 @click="onButtonClick_Upd">修改</vbuttonk>
-                        </div>
-                        <div class="split"></div>
-                        <div class="input_w">
-                            <vbuttonk type="default" class="input_w" permit="device.list.upd" 
-                                @click="onButtonClick_Update">升级</vbuttonk>
-                        </div>
-                        <div class="input_w">
-                            <vbuttonk type="default" class="input_w" permit="device.list.upd" 
-                                @click="onButtonClick_Config">配置</vbuttonk>
                         </div>
                     </div>
                 </div>
@@ -200,6 +208,7 @@ export default { name: "device_list" }
             </div>
         </div>
         <device_info ref="v_device_info" @close="onDialogClose_device"/>
+        <device_control ref="v_device_control" @close="onDialogClose_control"/>
         <device_config ref="v_device_config" @close="onDialogClose_config"/>
         <device_version ref="v_device_version" @close="onDialogClose_version"/>
     </div>    
