@@ -90,15 +90,17 @@ export default { name: "data_datafield" }
                     :on-item="onTableItem_field"
                     @loading="onTableLoading_field"
                     @row-click="onTableRowClick_field">                    
-                    <el-table-column prop="f_order" label="顺序" width="80" />
-                    <el-table-column prop="f_visible" label="显示" width="80" />
+                    <el-table-column prop="f_order" label="顺序" width="60" />
+                    <el-table-column prop="f_visible" label="显示" width="60" />
                     <el-table-column prop="f_type" label="类型" width="100" />
-                    <el-table-column prop="f_label" label="名称" width="160" />
+                    <el-table-column prop="f_label" label="名称" width="120" />
                     <el-table-column prop="f_dname" label="协议参数" width="160" />
                     <el-table-column prop="f_kname" label="解析参数" width="160" />
                     <el-table-column prop="f_precision" label="精度" width="80" />
-                    <el-table-column prop="f_unit" label="单位" width="120" />
-                    <el-table-column prop="f_width" label="宽度" width="120" />
+                    <el-table-column prop="f_unit" label="单位" width="100" />
+                    <el-table-column prop="f_width" label="宽度" width="100" />
+                    <el-table-column prop="f_data" label="数值" width="160" />
+                    <el-table-column prop="f_chart" label="图表" width="160" />
                     <el-table-column prop="f_note" label="备注" width="200" show-overflow-tooltip />
                     <el-table-column />
                 </vtable>

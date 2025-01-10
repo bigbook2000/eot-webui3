@@ -147,7 +147,7 @@ const netLoad_device_query = async (pageIndex: number) => {
     });
 
     let list = eocore.check_net_array(ret);
-    if (list == null) list = [];
+    if (list == null) return;
 
     await TLogic.getVersionNames(list);
 
@@ -190,7 +190,7 @@ const onButtonClick_Upd = () => {
  * 点击移除设备
  */
 const onButtonClick_Del = () => {
-    v_table_device.value!.remove_data_proc_select("np_device_del", (data) => {
+    v_table_device.value!.remove_data_proc_select("np_device_del", (data: any) => {
         return {
             "v_device_id": data["f_device_id"]
         }
@@ -244,7 +244,7 @@ const onTableItem_device = (data: any) => {
     data["f_dtime_s"] = eolib.datetime_2_string(data["f_dtime"]);
 
     // 格式化数据
-    TLogic.formatDeviceData(data);
+    TLogic.formatDeviceData(x_data_fields.value, data);
 }
 
 const onTablePage_device = (n: number): number => {

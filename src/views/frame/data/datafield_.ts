@@ -30,8 +30,11 @@ var x_form_types = ref<cform_options[]>([
     {type: "input", name: "f_dname", span: 2, label: "协议参数"},
     {type: "input", name: "f_kname", span: 2, label: "解析参数"},
     {type: "number", name: "f_precision", span: 2, label: "精度"},
-    {type: "input", name: "f_unit", span: 2, label: "单位"},
-    {type: "number", name: "f_width", span: 2, label: "宽度"},    
+    {type: "input", name: "f_unit", span: 2, label: "单位"},    
+    {type: "number", name: "f_width", span: 2, label: "宽度"},
+    {type: "blank", name: "", span: 2, label: ""},
+    {type: "input", name: "f_data", span: 2, label: "数值"},
+    {type: "input", name: "f_chart", span: 2, label: "图表"},
     {type: "input", name: "f_note", span: 100, label: "备注"},
 ]);
 
@@ -68,6 +71,8 @@ const getEmpty_field = (): any => {
         "f_unit": "",
         "f_order": 0,
         "f_width": 100,
+        "f_data": "",
+        "f_chart": "",
         "f_visible": 1,
         "f_note": ""
     }
@@ -119,7 +124,7 @@ const onButtonClick_Upd = () => {
  * 点击移除设备
  */
 const onButtonClick_Del = () => {
-    v_table_field.value!.remove_data_proc_select("np_datafield_del", (data) => {
+    v_table_field.value!.remove_data_proc_select("np_datafield_del", (data: any) => {
         return {
             "v_data_field_id": data["f_data_field_id"]
         }
@@ -170,6 +175,8 @@ const onDialogClose_field = async (cancel: boolean, data: any, cb: cfunc_boolean
         "v_order": data["f_order"],
         "v_width": data["f_width"],
         "v_visible": data["f_visible"],
+        "v_data": data["f_data"],
+        "v_chart": data["f_chart"],
         "v_note": data["f_note"],
     }, -1, fieldId <= 0, true);
 

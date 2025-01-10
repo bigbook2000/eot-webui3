@@ -61,10 +61,11 @@
             <div class="cell eo_w100">
             </div>
             <div class="cell eo_w4" v-for="item in x_output_fields" :key="item['f_dname']">
+                <div class="label_n">{{ item['f_label'] }}</div>
                 <div class="input">
-                    <el-button type="default" class="eo_w100" @click="onButtonClick_Cancel">
-                        {{ item['f_label'] }}
-                    </el-button>
+                    <el-switch type="default" class="eo_w100" :value="item['value']" 
+                        @click="onSwitchClick_Switch(item)">
+                    </el-switch>
                 </div>
             </div>
         </div>
@@ -108,15 +109,22 @@
             "v_type": '2011'
         })
         let list = eocore.check_net_array(ret);
-        if (list != undefined) {
-            x_data_fields.value = list;
+        if (list != undefined) {            
 
+            let list1 = [];
             let list2 = [];
             for (let d of list) {
+                
                 if (d["f_dname"].startsWith("TGPOut")) {
                     list2.push(d);
+                } else if (d["f_dname"].startsWith("TGPIn")) {
+                    list2.push(d);
+                } else {
+                    list1.push(d);
                 }
             }
+
+            x_data_fields.value = list1;
             x_output_fields.value = list2;
         }        
     });
@@ -130,7 +138,14 @@
         let dataNew = Object.assign({}, data);
         console.log(dataNew);
         
-        x_device_data = reactive(dataNew);        
+        x_device_data = reactive(dataNew);
+
+        let list2 = x_output_fields.value;
+        for (let d of list2) {
+            let dv = dataNew.dataList[d['f_dname']];
+            d["value"] = (parseInt(dv) != 0);
+        }
+        x_output_fields.value = list2;
     }
 
     const onDialogOpened = () => {
@@ -142,43 +157,41 @@
             x_show_dialog.value = !result;
         });
     }
-    /**
-     * 点击配置按钮
-     */
-    const onButtonClick_ConfigSet = async () => {
 
-        let dret = await eocore.show_confirm("确信要上传配置信息到设备吗？");
-        if (!dret) return;
+    const onBeforeChange_Switch = (e: any) => {
+        console.log("onBeforeChange_Switch", e);
+        return new Promise((resolve) => {    
+            return resolve(true)
+        });
+    }
 
-    //     let mn = x_device_data["f_mn"];
-    //     let configData: string = x_device_data["f_config_data_s"];
-    //     let jsonStr = TLogic.configDataEncode(configData);
+    const onSwitchClick_Switch = async (item: any) => {
+        console.log(item);
 
-    //     // 先保存配置
-    //     //console.log(configData);
-        
-    //     let ret;
+        let fn = item["f_dname"];
 
-    //     x_show_loading.value = true;
-    //     ret = await eocore.proc("np_config_set", {
-    //         "v_dkey": x_device_data["f_dkey"],
-    //         "v_config_data": jsonStr
-    //     });
+        // 只处理输出
+        if (!fn.startsWith("TGPOut")) return;
 
-    //     // 和升级保持一直，但不传bin文件长度
-    //    ret = await eocore.post("/iot/gate/iot/version/update", [{
-    //        "mn": mn,
-    //        "type": "",
-    //        "version": "",
-    //        "total": 0,
-    //        "sign": "",
-    //        "url": "",
-    //    }]);
-    //    x_show_loading.value = false;
-    //    let data = await eocore.check_net_object(ret);
-    //    if (data == null) return;
+        let pos = fn.indexOf('-');
+        if (pos < 0) return;
 
-    //     eocore.show_success("配置命令已发出，请稍后检查设备状态");
+        let bcheck = item["value"];
+        let fv = 1.1;
+        if (bcheck) fv = 0.1;
+
+        let mn = x_device_data["f_mn"];
+        x_show_loading.value = true;
+        let ret = await eocore.post("/iot/gate/iot/device/control", [{
+           "mn": mn,
+           //"data": fn.substring(0, pos) + "=" + fv,
+           "data": "TGPOut3=1.1",
+        }]);
+        x_show_loading.value = false;
+        let data = await eocore.check_net_object(ret);
+        if (data == null) return;
+
+        item["value"] = !bcheck;
     }
 
     defineExpose({

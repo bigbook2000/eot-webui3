@@ -5,6 +5,8 @@ import { useRouter } from 'vue-router';
 
 import { ElMessage, ElMessageBox } from 'element-plus'
 
+import router from "@/router/index"
+
 export default {
 
     /** 成功 */
@@ -187,7 +189,7 @@ export default {
 	 * @param arraySize 最少参数数组长度
 	 * @returns 
 	 */
-	get_info: function (ret: any, arraySize: number): string {
+	get_info(ret: any, arraySize: number): string {
 		
 		let that = this;
 		if (ret == undefined) {			
@@ -202,25 +204,20 @@ export default {
 
 		if (data._d == this.RESULT_SESSION) {
 
-			let router = useRouter();
+			// setup
+			//let router = useRouter();
 			let rname = router.currentRoute.value.name;
 			if (rname != "login") {
-				ElMessage.error("[E]会话超时");
-				window.location.href = '/';
-				//router.push({name: 'vlogin'});
-				return "";
+				ElMessage.error(data._s);
+				//window.location.href = "/";
+				router.replace({ name:'login' });
+				return data._s;
 			}			
 		}
 
 		if (data._d != 0) {
-			
-			if (data._s == undefined) {				
-				return "[E]未知描述";
-			} else {
-				
-				if (data._s.length <= 0) data._s = "[E]未知描述";
-				return data._s;
-			}
+			if (data._s.length <= 0) data._s = "[E]未知描述";
+			return data._s;
 		}
 
 		// 必须返回数组

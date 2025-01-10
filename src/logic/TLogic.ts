@@ -24,21 +24,53 @@ export default {
 
 	/**
 	 * 处理设备数据
+	 * data["f_data"] 为json字符串
+	 * fd["f_data"]和fd["f_chart"] 分别为表格和图表系数转换
 	 * @param data 
 	 */
-	formatDeviceData(data: any) {
+	formatDeviceData(fieldList: any[], data: any) {
 
 		data.dataList = {};
+		data.chartList = {};
 
 		try {
 
 			let ds = data["f_data"];
 			if (ds == undefined) return;
 
-			if (typeof(ds) == "string") {
-				data.dataList = JSON.parse(ds);
-				//console.log(data);
+			// f_data为json字符串
+			if (typeof(ds) != "string") return;
+				
+			let dlist = JSON.parse(ds);				
+			//console.log(dlist);
+
+			for (let fd of fieldList) {
+				let dn = fd["f_dname"];
+				let dp = fd["f_precision"];
+				let sdd = fd["f_data"];
+				let sdc = fd["f_chart"];
+
+				let d = dlist[dn];
+				if (d != undefined) {
+
+					let dv1 = parseFloat(d.toString());
+					let dv2 = dv1;
+
+					if (sdd.length > 0) {
+						sdd = sdd.replace(/\X/g, dv1);
+						dv1 = eval(sdd);
+					}
+					if (sdc.length > 0) {
+						sdc = sdc.replace(/\X/g, dv2);
+						dv2 = eval(sdd);
+					}
+
+					data.dataList[dn] = dv1.toFixed(dp);
+					data.chartList[dn] = dv2.toFixed(dp);
+				}					
 			}
+
+			console.log(data);
 			
 		} catch (ex) {
 			console.log(ex);
@@ -125,7 +157,7 @@ export default {
 			for (let d1 of list) {
 				for (let d2 of listVersion) {
 
-					console.log(d1, d2);
+					//console.log(d1, d2);
 					if (d1["f_dversion_id"] == d2["f_dversion_id"]) {
 						d1["f_dtype"] = d2["f_dtype"];
 						d1["f_dversion"] = d2["f_dversion"];
@@ -177,5 +209,17 @@ export default {
 		}
 		
 		return str;
+	},
+
+	/**
+	 * 
+	 * @param d 由于开关值统一为浮点数，避免浮点数问题+0.1
+	 * @returns 
+	 */
+	getDeviceSwitchString(d: any): string {
+
+		let dv = parseInt(d);
+		let ss = ["关",  "开"];
+		return ss[dv % ss.length];
 	}
 }

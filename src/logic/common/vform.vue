@@ -3,6 +3,10 @@
         <div v-for="form in types" :key="form.name" 
             :class="'cell eo_w' + form.span">
             <div class="label_w" :style="{width:labelWidth}">{{form.label}}</div>
+            <!-- blank 空占位 -->
+            <div v-if="form.type=='blank'" class="input">
+                &nbsp;
+            </div>
             <div v-if="form.type=='input'" class="input">
                 <el-input v-model="data[form.name]" style="width:100%"
                     maxlength="128"></el-input>
